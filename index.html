@@ -7,11 +7,18 @@
 
   <link rel="stylesheet" href="./src/ui-kit-0.css" />
 
+  <!-- third_party: offline libs (optional) -->
+  <!-- Wenn du Ajv/Chart nutzen willst, Dateien hier ablegen und diese Zeilen aktiv lassen-->
+  <!--   <script src="./third_party/chart.umd.js"></script-->
+   <!--  <script src="./third_party/ajv2020.js"></script> -->
+
   <style>
-    /* Mini-Styles für Demo-Output */
-    pre { background: #f6f7f9; padding: 12px; border-radius: 8px; overflow: auto; }
     h1 { margin: 0 0 8px 0; font-size: 20px; }
     .muted { opacity: 0.75; }
+    pre { background: #f6f7f9; padding: 12px; border-radius: 8px; overflow: auto; }
+
+    /* kleine Demo-Layout-Hilfe */
+    .grow { flex: 1 1 420px; }
   </style>
 </head>
 
@@ -19,53 +26,62 @@
 <script type="module">
   import * as UI from "./src/ui-kit-0.js";
 
-  // Root
   const app = new UI.VGrid().appendTo(document.body);
 
-  // Header (plain DOM ist ok für Demo)
-  const h = document.createElement("div");
-  h.innerHTML = `
+  const header = document.createElement("div");
+  header.innerHTML = `
     <h1>UI Kit 0 – Demo</h1>
-    <div class="muted">Wenn du das siehst, laden CSS + ES-Module korrekt.</div>
+    <div class="muted">
+      Module + CSS laufen. third_party optional: Chart/Ajv werden nur genutzt, wenn geladen.
+    </div>
   `;
-  app.el.appendChild(h);
+  app.el.appendChild(header);
 
-  // Layout
   const row = new UI.HGrid().appendTo(app);
-  const left = new UI.Card().appendTo(row);
-  const right = new UI.Card().appendTo(row);
+  row.el.classList.add("grow");
 
-  // State (Python-artig: ein Objekt, UI ist Projektion davon)
+  const left = new UI.Card().appendTo(row);
+  left.el.classList.add("grow");
+
+  const mid = new UI.Card().appendTo(row);
+  mid.el.classList.add("grow");
+
+  const right = new UI.Card().appendTo(row);
+  right.el.classList.add("grow");
+
+  // -----------------------
+  // State
+  // -----------------------
   const state = {
     clicks: 0,
     name: "",
-    agree: false
+    agree: false,
+    people: [
+      { id: 1, name: "Alice", age: 31, active: true },
+      { id: 2, name: "Bob", age: 24, active: false },
+      { id: 3, name: "Carla", age: 29, active: true }
+    ]
   };
 
-  // Controls (links)
+  // -----------------------
+  // Left: Controls
+  // -----------------------
   left.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">Controls</div>`;
 
   const btnRow = new UI.HGrid().appendTo(left);
 
   new UI.Button("Click +1")
     .appendTo(btnRow)
-    .onClick(() => {
-      state.clicks += 1;
-      render();
-    });
+    .onClick(() => { state.clicks += 1; render(); });
 
-  new UI.Button("Reset")
+  new UI.Button("Add Person")
     .appendTo(btnRow)
     .onClick(() => {
-      state.clicks = 0;
-      state.name = "";
-      state.agree = false;
-      nameField.el.value = "";
-      agreeBox.el.checked = false;
+      const id = Math.max(...state.people.map(p => p.id)) + 1;
+      state.people.push({ id, name: state.name || `User${id}`, age: Math.max(0, state.clicks), active: state.agree });
       render();
     });
 
-  // Simple form-ish controls
   const form = document.createElement("div");
   form.style.display = "grid";
   form.style.gridTemplateColumns = "160px 1fr";
@@ -75,38 +91,90 @@
   left.el.appendChild(form);
 
   // Name
-  const nameLabel = document.createElement("div");
-  nameLabel.textContent = "Name";
-  form.appendChild(nameLabel);
-
+  form.appendChild(Object.assign(document.createElement("div"), { textContent: "Name" }));
   const nameField = new UI.TextField("").appendTo(form);
-  nameField.on("input", () => {
-    state.name = nameField.getValue();
-    render();
-  });
+  nameField.on("input", () => { state.name = nameField.getValue(); render(); });
 
   // Agree
-  const agreeLabel = document.createElement("div");
-  agreeLabel.textContent = "Agree";
-  form.appendChild(agreeLabel);
-
+  form.appendChild(Object.assign(document.createElement("div"), { textContent: "Active" }));
   const agreeWrap = document.createElement("div");
   form.appendChild(agreeWrap);
-
   const agreeBox = new UI.Checkbox(false).appendTo(agreeWrap);
-  agreeBox.on("change", () => {
-    state.agree = agreeBox.getValue();
-    render();
+  agreeBox.on("change", () => { state.agree = agreeBox.getValue(); render(); });
+
+  // -----------------------
+  // Mid: Table
+  // -----------------------
+  mid.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">Table</div>`;
+
+  const table = new UI.TableView({
+    columns: [
+      { key: "id", label: "ID", align: "right" },
+      { key: "name", label: "Name" },
+      { key: "age", label: "Age", align: "right" },
+      { key: "active", label: "Active", format: (v) => v ? "✓" : "—", align: "center" }
+    ],
+    data: state.people
+  }).appendTo(mid);
+
+  // optional: row click
+  table.onRowClick((row) => {
+    console.log("row clicked:", row);
   });
 
-  // Output (rechts)
-  right.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">State</div>`;
+  // -----------------------
+  // Right: Debug + optional Chart/Ajv status
+  // -----------------------
+  right.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">Debug</div>`;
+
+  const status = document.createElement("div");
+  status.className = "muted";
+  right.el.appendChild(status);
+
   const pre = document.createElement("pre");
   right.el.appendChild(pre);
 
-  function render() {
-    pre.textContent = JSON.stringify(state, null, 2);
+  // Optional Chart (only if loaded)
+  let chart = null;
+  const chartHost = document.createElement("div");
+  chartHost.style.marginTop = "12px";
+  right.el.appendChild(chartHost);
+
+  function ensureChart() {
+    if (chart) return chart;
+    if (!window.Chart) return null;
+
+    const card = document.createElement("div");
+    card.style.marginTop = "12px";
+    chartHost.appendChild(card);
+
+    chart = new UI.ChartView({
+      type: "bar",
+      data: { labels: ["Clicks"], datasets: [{ label: "clicks", data: [state.clicks] }] }
+    }).appendTo(card);
+
+    return chart;
   }
+
+  function render() {
+    // status
+    const hasChart = !!window.Chart;
+    const hasAjv = !!window.Ajv2020;
+    status.textContent = `Chart: ${hasChart ? "OK" : "off"} | Ajv: ${hasAjv ? "OK" : "off"}`;
+
+    // debug json
+    pre.textContent = JSON.stringify(state, null, 2);
+
+    // table refresh
+    table.setData(state.people);
+
+    // chart refresh (if available)
+    const c = ensureChart();
+    if (c) {
+      c.setData({ labels: ["Clicks"], datasets: [{ label: state.name || "clicks", data: [state.clicks] }] });
+    }
+  }
+
   render();
 </script>
 </body>
