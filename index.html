@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>UI Kit 0</title>
+
+  <link rel="stylesheet" href="./src/ui-kit-0.css" />
+
+  <style>
+    /* Mini-Styles für Demo-Output */
+    pre { background: #f6f7f9; padding: 12px; border-radius: 8px; overflow: auto; }
+    h1 { margin: 0 0 8px 0; font-size: 20px; }
+    .muted { opacity: 0.75; }
+  </style>
+</head>
+
+<body>
+<script type="module">
+  import * as UI from "./src/ui-kit-0.js";
+
+  // Root
+  const app = new UI.VGrid().appendTo(document.body);
+
+  // Header (plain DOM ist ok für Demo)
+  const h = document.createElement("div");
+  h.innerHTML = `
+    <h1>UI Kit 0 – Demo</h1>
+    <div class="muted">Wenn du das siehst, laden CSS + ES-Module korrekt.</div>
+  `;
+  app.el.appendChild(h);
+
+  // Layout
+  const row = new UI.HGrid().appendTo(app);
+  const left = new UI.Card().appendTo(row);
+  const right = new UI.Card().appendTo(row);
+
+  // State (Python-artig: ein Objekt, UI ist Projektion davon)
+  const state = {
+    clicks: 0,
+    name: "",
+    agree: false
+  };
+
+  // Controls (links)
+  left.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">Controls</div>`;
+
+  const btnRow = new UI.HGrid().appendTo(left);
+
+  new UI.Button("Click +1")
+    .appendTo(btnRow)
+    .onClick(() => {
+      state.clicks += 1;
+      render();
+    });
+
+  new UI.Button("Reset")
+    .appendTo(btnRow)
+    .onClick(() => {
+      state.clicks = 0;
+      state.name = "";
+      state.agree = false;
+      nameField.el.value = "";
+      agreeBox.el.checked = false;
+      render();
+    });
+
+  // Simple form-ish controls
+  const form = document.createElement("div");
+  form.style.display = "grid";
+  form.style.gridTemplateColumns = "160px 1fr";
+  form.style.gap = "8px";
+  form.style.alignItems = "center";
+  form.style.marginTop = "12px";
+  left.el.appendChild(form);
+
+  // Name
+  const nameLabel = document.createElement("div");
+  nameLabel.textContent = "Name";
+  form.appendChild(nameLabel);
+
+  const nameField = new UI.TextField("").appendTo(form);
+  nameField.on("input", () => {
+    state.name = nameField.getValue();
+    render();
+  });
+
+  // Agree
+  const agreeLabel = document.createElement("div");
+  agreeLabel.textContent = "Agree";
+  form.appendChild(agreeLabel);
+
+  const agreeWrap = document.createElement("div");
+  form.appendChild(agreeWrap);
+
+  const agreeBox = new UI.Checkbox(false).appendTo(agreeWrap);
+  agreeBox.on("change", () => {
+    state.agree = agreeBox.getValue();
+    render();
+  });
+
+  // Output (rechts)
+  right.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">State</div>`;
+  const pre = document.createElement("pre");
+  right.el.appendChild(pre);
+
+  function render() {
+    pre.textContent = JSON.stringify(state, null, 2);
+  }
+  render();
+</script>
+</body>
+</html>

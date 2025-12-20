@@ -1,0 +1,152 @@
+/* ===============================
+   UI BASE
+   =============================== */
+
+:root {
+  --ui-font: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --ui-bg: #ffffff;
+  --ui-bg-muted: #f6f7f9;
+  --ui-border: #d0d4da;
+
+  --ui-text: #1a1a1a;
+  --ui-text-muted: #6b7280;
+
+  --ui-accent: #2563eb;
+  --ui-accent-hover: #1e4fd6;
+
+  --ui-error: #b00020;
+
+  --ui-radius: 8px;
+  --ui-gap: 12px;
+  --ui-padding: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ui-font);
+  background: var(--ui-bg);
+  color: var(--ui-text);
+}
+
+/* ===============================
+   LAYOUT
+   =============================== */
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--ui-gap);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap);
+}
+
+.card {
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  padding: var(--ui-padding);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Formular-Zeilen */
+.field {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ===============================
+   CONTROLS
+   =============================== */
+
+button {
+  font: inherit;
+  padding: 8px 14px;
+  border-radius: var(--ui-radius);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--ui-accent-hover);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  padding: 8px;
+  border-radius: var(--ui-radius);
+  border: 1px solid var(--ui-border);
+  background: #fff;
+  width: 100%;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 160px;
+}
+
+input[type="checkbox"] {
+  width: auto;
+}
+
+/* ===============================
+   TEXT & STATES
+   =============================== */
+
+.muted {
+  color: var(--ui-text-muted);
+  font-size: 0.9em;
+}
+
+.error {
+  color: var(--ui-error);
+  font-size: 0.9em;
+}
+
+ul.error {
+  margin: 4px 0 0 16px;
+  padding: 0;
+}
+
+/* ===============================
+   CHART
+   =============================== */
+
+canvas {
+  max-width: 100%;
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+
+@media (max-width: 700px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .field {
+    grid-template-columns: 1fr;
+  }
+}
