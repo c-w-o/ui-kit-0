@@ -339,3 +339,27 @@ canvas {
 .ui-table tbody tr {
   cursor: pointer;
 }
+
+/* Tabs */
+.ui-tabs { width: 100%; }
+
+.ui-tabbar {
+  margin-bottom: 10px;
+}
+
+/* Tab Buttons (nutzen ui-btn) */
+.ui-tabbtn {
+  /* kleiner/kompakter als normale Buttons */
+  padding: 6px 10px;
+}
+
+/* Active Tab */
+.ui-tabbtn.active {
+  background: var(--ui-accent, #2563eb);
+  color: #fff;
+  border-color: var(--ui-accent, #2563eb);
+}
+
+.ui-tabpanel {
+  padding: 2px;
+}
