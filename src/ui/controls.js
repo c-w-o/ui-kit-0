@@ -180,3 +180,38 @@ export class Select extends BaseElement {
     return unsub;
   }
 }
+
+// --- Simple text blocks --------------------------------------
+
+// Generic text container (div by default)
+export class Text extends BaseElement {
+  constructor(text = "", { tag = "div", muted = false, className = "" } = {}) {
+    super(tag);
+    if (className) this.el.className = className;
+    if (muted) this.el.classList.add("muted");
+    this.setText(text);
+  }
+}
+
+export class Label extends Text {
+  constructor(text = "") {
+    super(text, { tag: "div", className: "ui-label" });
+  }
+}
+
+export class Heading extends BaseElement {
+  constructor(text = "", { level = 2 } = {}) {
+    super(`h${Math.min(6, Math.max(1, level))}`);
+    this.el.style.margin = "0";
+    this.setText(text);
+  }
+}
+
+export class Pre extends BaseElement {
+  constructor(text = "") {
+    super("pre");
+    this.el.style.margin = "0";
+    this.el.style.whiteSpace = "pre-wrap";
+    this.setText(text);
+  }
+}

@@ -7,8 +7,10 @@ export class Div extends BaseElement {
     this.setStyle(style);
   }
 
+  // Add a child (BaseElement or DOM node)
   add(child) {
-    this.el.appendChild(child?.el ?? child);
+    if (!child) return this;
+    this.el.appendChild(child.el ?? child);
     return this;
   }
 }
@@ -39,13 +41,15 @@ export class VDiv extends Div {
   }
 }
 
-/** Spacer für Flex-Layouts (nimmt Restplatz ein) */
+// Spacer for flex layouts: consumes remaining space
 export class HSpacer extends Div {
   constructor({ flex = 1 } = {}) {
     super({ className: "ui-hspacer" });
     this.setStyle({ flex: String(flex), minWidth: "0" });
   }
 }
+
+/* legacy grid helpers (optional, fine to keep) */
 export class VSpacer extends Div {
   constructor({ flex = 1 } = {}) {
     super({ className: "ui-vspacer" });
@@ -68,8 +72,27 @@ export class HGrid extends BaseElement {
 }
 
 export class Card extends BaseElement {
-  constructor() {
+  constructor({ title = null } = {}) {
     super("div");
     this.addClass("card");
+
+    this.header = document.createElement("div");
+    this.header.className = "ui-card-header";
+    this.body = document.createElement("div");
+    this.body.className = "ui-card-body";
+
+    this.el.append(this.header, this.body);
+
+    if (title) this.setTitle(title);
+  }
+
+  setTitle(title) {
+    this.header.textContent = title ?? "";
+    return this;
+  }
+
+  add(child) {
+    this.body.appendChild(child?.el ?? child);
+    return this;
   }
 }

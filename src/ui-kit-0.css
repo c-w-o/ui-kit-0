@@ -340,26 +340,53 @@ canvas {
   cursor: pointer;
 }
 
-/* Tabs */
+/* -----------------------
+   SelectionGroup
+------------------------ */
+.ui-selection-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;        /* allow scrolling when not in dropdown-mode */
+  padding-bottom: 2px;
+}
+
+.ui-selection-btn {
+  padding: 6px 10px;       /* slightly more compact */
+  white-space: nowrap;
+}
+
+/* -----------------------
+   Tabs
+------------------------ */
 .ui-tabs { width: 100%; }
 
-.ui-tabbar {
+.ui-tabbar { margin-bottom: 10px; }
+
+/* Dropdown hidden by default */
+.ui-tabselect {
+  display: none;
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--ui-radius, 8px);
+  border: 1px solid var(--ui-border, #d0d4da);
+  background: #fff;
   margin-bottom: 10px;
 }
 
-/* Tab Buttons (nutzen ui-btn) */
-.ui-tabbtn {
-  /* kleiner/kompakter als normale Buttons */
-  padding: 6px 10px;
+/* When overflowing: use dropdown mode */
+.ui-tabs.dropdown-mode .ui-tabselect { display: block; }
+.ui-tabs.dropdown-mode .ui-tabbar    { display: none; }
+
+.ui-tabpanel { width: 100%; }
+
+.ui-card-header {
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-/* Active Tab */
-.ui-tabbtn.active {
-  background: var(--ui-accent, #2563eb);
-  color: #fff;
-  border-color: var(--ui-accent, #2563eb);
-}
-
-.ui-tabpanel {
-  padding: 2px;
+.ui-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

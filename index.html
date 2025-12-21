@@ -3,225 +3,282 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UI Kit 0 – Demo</title>
+  <title>UI Kit 0 – Widgets Demo (no chart/json-editor)</title>
 
   <link rel="stylesheet" href="./src/ui-kit-0.css" />
 
-  <!-- Third-party (offline, lokal) -->
+  <!-- Optional (offline/local): Ajv2020 UMD -> window.ajv2020 (per your third_party file) -->
   <script src="./src/third_party/ajv2020.js"></script>
-
-  <!-- Optional: Chart.js UMD (falls du es lokal ablegst)
-       Erwartet: window.Chart -->
-  <!-- <script src="./src/third_party/chart.umd.js"></script> -->
 </head>
 
 <body>
 <script type="module">
   import * as UI from "./src/ui-kit-0.js";
 
-  // -----------------------
-  // App Root
-  // -----------------------
-  const app = new UI.VGrid().appendTo(document.body);
-
-  const header = document.createElement("div");
-  header.innerHTML = `
-    <h1 style="margin:0;">UI Kit 0 – Demo</h1>
-    <div class="muted">
-      UI-Kit läuft. Ajv/Chart optional. (Ajv: ${!!(window.Ajv2020 || window.ajv2020)} / Chart: ${!!window.Chart})
-    </div>
-  `;
-  app.el.appendChild(header);
-
-  const row = new UI.HGrid().appendTo(app);
-
-  const left = new UI.Card().appendTo(row);
-  const mid  = new UI.Card().appendTo(row);
-  const right= new UI.Card().appendTo(row);
-
-  left.el.style.flex = "1 1 340px";
-  mid.el.style.flex  = "1 1 420px";
-  right.el.style.flex= "1 1 420px";
-
-  // -----------------------
+  // ------------------------------------------------------------
   // Store
-  // -----------------------
+  // ------------------------------------------------------------
   const store = new UI.Store({
     clicks: 0,
     name: "Alice",
-    agree: true,
     role: "dev",
     age: 31,
+    agree: true,
+    config: { featureX: false },
     people: [
       { id: 1, name: "Alice", age: 31, active: true },
-      { id: 2, name: "Bob", age: 24, active: false },
+      { id: 2, name: "Bob",   age: 24, active: false },
       { id: 3, name: "Carla", age: 29, active: true },
     ],
-    config: {
-      refreshSeconds: 5,
-      featureX: false
+    ui: {
+      zebra: true,
+      activePanel: "controls",
     }
   });
 
-  // -----------------------
-  // Left: Controls
-  // -----------------------
-  left.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">Controls</div>`;
+  // ------------------------------------------------------------
+  // App root layout
+  // ------------------------------------------------------------
+  const app = new UI.VDiv({ gap: 12, className: "app" }).appendTo(document.body);
 
-  const btnRow = new UI.HGrid().appendTo(left);
+  new UI.Heading("UI Kit 0 – Widgets Demo", { level: 1 }).appendTo(app);
 
-  new UI.Button("Click +1").appendTo(btnRow).onClick(() => {
-    store.setPath("clicks", (store.get().clicks || 0) + 1);
+  new UI.Text(
+    `Showing: layout, spacers, controls, store-bindings, selection, tabs, table. ` +
+    `Ajv loaded: ${String(!!(window.ajv2020 || window.Ajv2020))}. ` +
+    `(No Chart, no JSON editor on purpose.)`,
+    { muted: true }
+  ).appendTo(app);
+
+  // Main row: left (tabs), right (debug)
+  const main = new UI.HDiv({ gap: 12, wrap: true, align: "stretch" }).appendTo(app);
+
+  const leftCard  = new UI.Card().appendTo(main);
+  const rightCard = new UI.Card().appendTo(main);
+
+  leftCard.setStyle({ flex: "2 1 560px" }).setTitle("Demo Tabs");
+  rightCard.setStyle({ flex: "1 1 360px" }).setTitle("Debug");
+
+  // ------------------------------------------------------------
+  // Debug panel (right)
+  // ------------------------------------------------------------
+
+  const debug = new UI.VDiv({ gap: 8 }).appendTo(rightCard);
+
+  const debugRow = new UI.HDiv({ gap: 8, wrap: true, align: "center" }).appendTo(debug);
+
+  // Small layout demo: spacer pushes buttons to the right
+  new UI.Div({ className: "muted" }).setText("Spacer demo:").appendTo(debugRow);
+  new UI.HSpacer().appendTo(debugRow);
+  new UI.Button("Ping", { variant: "secondary" }).appendTo(debugRow).onClick(() => {
+    console.log("ping", new Date().toISOString());
   });
 
-  new UI.Button("Reset", { variant: "secondary" }).appendTo(btnRow).onClick(() => {
-    store.merge({ clicks: 0 });
+  const pre = new UI.Pre("").appendTo(debug);
+  store.subscribe(() => pre.setText(JSON.stringify(store.get(), null, 2)));
+  pre.setText(JSON.stringify(store.get(), null, 2));
+
+  // Keep debug updated
+  store.subscribe(() => {
+    pre.textContent = JSON.stringify(store.get(), null, 2);
   });
+  pre.textContent = JSON.stringify(store.get(), null, 2);
 
-  new UI.Button("Danger", { variant: "danger" }).appendTo(btnRow).onClick(() => {
-    alert("Danger button demo");
-  });
+  // ------------------------------------------------------------
+  // Tabs (left)
+  // ------------------------------------------------------------
 
-  // Form grid
-  const form = document.createElement("div");
-  form.className = "field";
-  form.style.marginTop = "12px";
-  left.el.appendChild(form);
+  const tabs = new UI.Tabs({ active: store.get().ui.activePanel }).appendTo(leftCard);
+  tabs.onChange((id) => store.setPath("ui.activePanel", id));
 
-  // Name
-  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Name" }));
-  const nameField = new UI.TextField("", { placeholder: "Name…" }).appendTo(form);
-  nameField.bind(store, "name");
+  // ------------------------------------------------------------
+  // Tab 1: Controls + bindings
+  // ------------------------------------------------------------
+  tabs.addTab("controls", "Controls", () => {
+    const root = new UI.VDiv({ gap: 12 }).appendTo(document.createElement("div"));
 
-  // Role (Select)
-  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Role" }));
-  const roleSelect = new UI.Select({
-    options: [
-      { value: "dev", label: "Developer" },
-      { value: "ops", label: "Ops" },
-      { value: "pm",  label: "Product" },
-    ],
-    placeholder: "Bitte wählen…",
-  }).appendTo(form);
-  roleSelect.bind(store, "role");
+    // Button row
+    const btnRow = new UI.HDiv({ gap: 8, wrap: true, align: "center" }).appendTo(root);
 
-  // Age (typed Select demo)
-  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Age (typed)" }));
-  const ageSelect = new UI.Select({
-    options: [18, 24, 29, 31, 42, 55],
-    parse: (s) => (s === "" ? null : Number(s)),
-    format: (v) => (v == null ? "" : String(v)),
-    placeholder: "–",
-  }).appendTo(form);
-  ageSelect.bind(store, "age");
-
-  // Checkbox normal
-  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Active (box)" }));
-  const agreeBox = new UI.Checkbox(false).appendTo(form);
-  agreeBox.bind(store, "agree");
-
-  // Checkbox slider
-  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Feature X (slider)" }));
-  const fx = new UI.Checkbox(false, { slider: true }).appendTo(form);
-  fx.bind(store, "config.featureX");
-
-  // Add person
-  new UI.Button("Add Person", { variant: "secondary" }).appendTo(left).onClick(() => {
-    const s = store.get();
-    const nextId = Math.max(...s.people.map(p => p.id)) + 1;
-    store.setPath("people", [
-      ...s.people,
-      { id: nextId, name: s.name || `User${nextId}`, age: s.age ?? 0, active: !!s.agree }
-    ]);
-  });
-
-  // -----------------------
-  // Mid: Table
-  // -----------------------
-  mid.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">Table</div>`;
-
-  const table = new UI.TableView({
-    columns: [
-      { key: "id", label: "ID", align: "right" },
-      { key: "name", label: "Name" },
-      { key: "age", label: "Age", align: "right" },
-      { key: "active", label: "Active", align: "center", format: v => v ? "✓" : "—" }
-    ], zebra: true
-  }).appendTo(mid);
-
-  table.bind(store, "people");
-
-  // -----------------------
-  // Right: JSON editor (Schema validation) + Debug view + Optional Chart
-  // -----------------------
-  right.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">JSON / Validation / Debug</div>`;
-
-  // Schema for config object
-  const schema = {
-    type: "object",
-    properties: {
-      refreshSeconds: { type: "integer", minimum: 1, maximum: 3600 },
-      featureX: { type: "boolean" }
-    },
-    required: ["refreshSeconds", "featureX"],
-    additionalProperties: false
-  };
-
-  // If Ajv isn't loaded, JsonTextEditor will currently throw via makeValidator().
-  // (After you apply the validation.js fix, it will work with window.ajv2020.)
-  let editor;
-  try {
-    editor = new UI.JsonTextEditor({
-      schema,
-      initialValue: store.get().config,
-      onChange: (data, res) => {
-        // Only apply if valid AND parsed
-        if (res?.ok) store.setPath("config", data);
-      }
-    }).appendTo(right);
-
-    editor.onValid((data) => {
-      // keep UI in sync if someone edits config elsewhere
-      // (optional: you can call editor.setValue(store.get().config) on subscribe)
+    new UI.Button("Click +1").appendTo(btnRow).onClick(() => {
+      store.setPath("clicks", (store.get().clicks || 0) + 1);
     });
-  } catch (e) {
-    const msg = document.createElement("div");
-    msg.className = "ui-help error";
-    msg.textContent = String(e.message || e);
-    right.el.appendChild(msg);
-  }
 
-  // Debug state
-  const pre = document.createElement("pre");
-  pre.style.margin = "0";
-  pre.style.whiteSpace = "pre-wrap";
-  pre.style.background = "var(--ui-bg-muted)";
-  pre.style.padding = "10px";
-  pre.style.borderRadius = "8px";
-  right.el.appendChild(pre);
+    new UI.Button("Reset", { variant: "secondary" }).appendTo(btnRow).onClick(() => {
+      store.merge({ clicks: 0 });
+    });
 
-  store.subscribe((s) => {
-    pre.textContent = JSON.stringify(s, null, 2);
+    new UI.Button("Danger", { variant: "danger" }).appendTo(btnRow).onClick(() => {
+      alert("Danger button demo");
+    });
+
+    // Form-like grid: labels + inputs
+    const form = new UI.Div({ className: "field", style: { marginTop: "4px" } }).appendTo(root);
+
+    // Helper: label
+    const addLabel = (text) => {
+      const l = document.createElement("div");
+      l.className = "ui-label";
+      l.textContent = text;
+      form.el.appendChild(l);
+    };
+
+    // Name
+    addLabel("Name");
+    const nameField = new UI.TextField("", { placeholder: "Name…" }).appendTo(form);
+    nameField.bind(store, "name");
+
+    // Role (Select)
+    addLabel("Role");
+    const roleSelect = new UI.Select({
+      options: [
+        { value: "dev", label: "Developer" },
+        { value: "ops", label: "Ops" },
+        { value: "pm",  label: "Product" },
+      ],
+      placeholder: "Bitte wählen…",
+    }).appendTo(form);
+    roleSelect.bind(store, "role");
+
+    // Age (typed Select demo)
+    addLabel("Age (typed)");
+    const ageSelect = new UI.Select({
+      options: [18, 24, 29, 31, 42, 55],
+      parse: (s) => (s === "" ? null : Number(s)),
+      format: (v) => (v == null ? "" : String(v)),
+      placeholder: "–",
+    }).appendTo(form);
+    ageSelect.bind(store, "age");
+
+    // Checkbox normal
+    addLabel("Agree (box)");
+    const agreeBox = new UI.Checkbox(false).appendTo(form);
+    agreeBox.bind(store, "agree");
+
+    // Checkbox slider
+    addLabel("Feature X (slider)");
+    const fx = new UI.Checkbox(false, { slider: true }).appendTo(form);
+    fx.bind(store, "config.featureX");
+
+    // Small live readout row
+    const info = new UI.Div({ className: "muted" }).appendTo(root);
+    store.subscribe(() => {
+      const s = store.get();
+      info.setText(`clicks=${s.clicks} | name=${s.name} | role=${s.role} | age=${s.age} | agree=${s.agree} | featureX=${s.config.featureX}`);
+    });
+    info.setText(`clicks=${store.get().clicks} | name=${store.get().name} | role=${store.get().role} | age=${store.get().age} | agree=${store.get().agree} | featureX=${store.get().config.featureX}`);
+
+    return root;
   });
 
-  // Optional Chart
-  if (window.Chart) {
-    const chart = new UI.ChartView({
-      type: "bar",
-      data: { labels: ["Clicks"], datasets: [{ label: "clicks", data: [0] }] },
-      options: { responsive: true }
-    }).appendTo(right);
+  // ------------------------------------------------------------
+  // Tab 2: TableView + zebra toggle + row click
+  // ------------------------------------------------------------
+  tabs.addTab("table", "Table", () => {
+    const root = new UI.VDiv({ gap: 12 }).appendTo(document.createElement("div"));
 
-    chart.bind(store, (s) => ({
-      labels: ["Clicks"],
-      datasets: [{ label: s.name || "clicks", data: [s.clicks || 0] }]
-    }));
-  } else {
-    const hint = document.createElement("div");
-    hint.className = "ui-help";
-    hint.textContent = "Chart: nicht geladen (optional third_party/chart.umd.js).";
-    right.el.appendChild(hint);
-  }
+    const bar = new UI.HDiv({ gap: 8, wrap: true, align: "center" }).appendTo(root);
+
+    const zebraToggle = new UI.Checkbox(store.get().ui.zebra, { slider: true }).appendTo(bar);
+    zebraToggle.on("change", () => store.setPath("ui.zebra", zebraToggle.getValue()));
+
+    new UI.Div({ className: "muted" }).setText("Zebra rows").appendTo(bar);
+
+    new UI.HSpacer().appendTo(bar);
+
+    new UI.Button("Add random").appendTo(bar).onClick(() => {
+      const p = store.get().people;
+      const nextId = (Math.max(0, ...p.map(x => x.id)) + 1);
+      const names = ["Dana", "Eli", "Fay", "Gus", "Hana", "Ivo"];
+      const name = names[Math.floor(Math.random() * names.length)] + nextId;
+      p.push({ id: nextId, name, age: 18 + Math.floor(Math.random() * 50), active: Math.random() > 0.4 });
+      store.setPath("people", p);
+    });
+
+    const table = new UI.TableView({
+      columns: [
+        { key: "id",     label: "ID",     align: "right" },
+        { key: "name",   label: "Name" },
+        { key: "age",    label: "Age",    align: "right" },
+        { key: "active", label: "Active", align: "center", format: (v) => v ? "✓" : "—" },
+      ],
+      data: store.get().people,
+      zebra: store.get().ui.zebra,
+    }).appendTo(root);
+
+    table.onRowClick((row) => {
+      alert(`Row click:\n${JSON.stringify(row, null, 2)}`);
+    });
+
+    // Bind table data
+    table.bind(store, "people");
+
+    // Bind zebra flag
+    store.subscribePath("ui.zebra", (val) => table.setZebra(!!val));
+
+    return root;
+  });
+
+  // ------------------------------------------------------------
+  // Tab 3: SelectionGroup demo
+  // ------------------------------------------------------------
+  tabs.addTab("selection", "Selection", () => {
+    const root = new UI.VDiv({ gap: 12 }).appendTo(document.createElement("div"));
+
+    const group = new UI.SelectionGroup({ active: "a", wrap: true }).appendTo(root);
+    group.addItem("a", "Option A");
+    group.addItem("b", "Option B");
+    group.addItem("c", "Option C");
+    group.addItem("d", "Option D");
+
+    const out = new UI.Div({ className: "muted" }).appendTo(root);
+    out.setText(`Active: ${group.getActive()}`);
+
+    group.onChange((id) => {
+      out.setText(`Active: ${id}`);
+    });
+
+    const hint = new UI.Div({ className: "muted" }).appendTo(root);
+    hint.setText("Keyboard: ArrowLeft/ArrowRight, Home/End, Enter/Space.");
+
+    return root;
+  });
+
+  // ------------------------------------------------------------
+  // Tab 4: Layout widgets (Div/HDiv/VDiv + spacers)
+  // ------------------------------------------------------------
+  tabs.addTab("layout", "Layout", () => {
+    const root = new UI.VDiv({ gap: 12 }).appendTo(document.createElement("div"));
+
+    new UI.Div({ className: "muted" })
+      .setText("HDiv with HSpacer pushes the right block to the edge:")
+      .appendTo(root);
+
+    const top = new UI.HDiv({ gap: 8, wrap: false, align: "center" }).appendTo(root);
+    new UI.Div().setText("Left").appendTo(top);
+    new UI.HSpacer().appendTo(top);
+    new UI.Div().setText("Right").appendTo(top);
+
+    new UI.Div({ className: "muted" })
+      .setText("VDiv stacks; VSpacer can consume remaining space if container has fixed height:")
+      .appendTo(root);
+
+    const box = new UI.VDiv({
+      gap: 8,
+      className: "card",
+      style: { height: "180px", padding: "12px" }
+    }).appendTo(root);
+
+    new UI.Div().setText("Top").appendTo(box);
+    new UI.VSpacer().appendTo(box);
+    new UI.Div().setText("Bottom").appendTo(box);
+
+    return root;
+  });
+
+  // Set initial active panel based on store
+  tabs.setActive(store.get().ui.activePanel);
+
 </script>
 </body>
 </html>

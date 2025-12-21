@@ -2,6 +2,7 @@ export * from "./ui/base.js";
 export * from "./ui/layout.js";
 export * from "./ui/controls.js";
 export * from "./ui/table.js";
+export * from "./ui/selection.js";
 export * from "./ui/tabs.js";
 export * from "./ui/json-editor.js";
 export * from "./ui/chart.js";
