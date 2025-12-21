@@ -303,3 +303,39 @@ canvas {
 .ui-help.error {
   color: var(--ui-error, #b00020);
 }
+
+/* -----------------------
+   Table
+------------------------ */
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ui-table th,
+.ui-table td {
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.10);
+  vertical-align: top;
+}
+
+.ui-table thead th {
+  text-align: left;
+  font-weight: 600;
+  background: rgba(255,255,255,0.06);
+}
+
+/* Zebra */
+.ui-table.zebra tbody tr:nth-child(odd)  { background: rgba(0,0,0,0.03); }
+.ui-table.zebra tbody tr:nth-child(even) { background: rgba(255,255,255,0.00); }
+
+/* Hover (macht sofort “UI” draus) */
+.ui-table tbody tr:hover {
+  background: rgba(120,180,255,0.10);
+}
+
+/* Optional: wenn Row-Click benutzt wird, sieht’s klickbar aus */
+.ui-table tbody tr {
+  cursor: pointer;
+}

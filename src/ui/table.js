@@ -1,7 +1,7 @@
 import { BaseElement } from "./base.js";
 
 export class TableView extends BaseElement {
-  constructor({ columns = [], data = [] } = {}) {
+  constructor({ columns = [], data = [], zebra = true } = {}) {
     super("div");
     this.columns = columns;
     this.data = data;
@@ -9,6 +9,8 @@ export class TableView extends BaseElement {
 
     this.table = document.createElement("table");
     this.table.className = "ui-table";
+    if (zebra) this.table.classList.add("zebra");
+    
 
     this.thead = document.createElement("thead");
     this.tbody = document.createElement("tbody");
@@ -18,6 +20,11 @@ export class TableView extends BaseElement {
     this.el.appendChild(this.table);
 
     this.render();
+  }
+  
+  setZebra(on = true) {
+    this.table.classList.toggle("zebra", !!on);
+    return this;
   }
 
   setColumns(columns) {

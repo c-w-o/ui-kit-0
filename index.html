@@ -146,7 +146,7 @@
       { key: "name", label: "Name" },
       { key: "age", label: "Age", align: "right" },
       { key: "active", label: "Active", align: "center", format: v => v ? "✓" : "—" }
-    ]
+    ], zebra: true
   }).appendTo(mid);
 
   table.bind(store, "people");
