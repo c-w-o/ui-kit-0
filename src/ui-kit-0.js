@@ -5,3 +5,4 @@ export * from "./ui/table.js";
 export * from "./ui/json-editor.js";
 export * from "./ui/chart.js";
 export * from "./ui/validation.js";
+export * from "./ui/store.js";

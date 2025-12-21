@@ -10,10 +10,10 @@ export class JsonTextEditor extends BaseElement {
     this.onValidCb = null;
 
     this.text = document.createElement("textarea");
-    this.text.style.width = "100%";
-    this.text.style.minHeight = "200px";
-
+    this.text.classList.add("ui-textarea");
+    
     this.msg = document.createElement("div");
+    this.msg.className = "ui-help";
 
     this.el.append(this.text, this.msg);
     this.setValue(initialValue);
@@ -36,18 +36,26 @@ export class JsonTextEditor extends BaseElement {
     try {
       data = JSON.parse(this.text.value);
     } catch (e) {
-      this.msg.innerHTML = `<div class="error">JSON parse error</div>`;
+      this.text.classList.add("invalid");
+      this.msg.className = "ui-help error";
+      this.msg.textContent = "JSON parse error";
       return;
     }
 
     const res = this.validator(data);
     if (res.ok) {
+      this.text.classList.remove("invalid");
+      this.msg.className = "ui-help";
       this.msg.textContent = "✓ valid";
       this.onValidCb?.(data);
     } else {
+      this.text.classList.add("invalid");
+      this.msg.className = "ui-help error";
       this.msg.innerHTML =
-        `<div class="error">Schema error</div>` +
-        `<ul class="error">${res.errors.map(e => `<li>${e.instancePath} ${e.message}</li>`).join("")}</ul>`;
+        `<div>Schema error</div>` +
+        `<ul style="margin:4px 0 0 16px; padding:0;">${
+          res.errors.map(e => `<li>${e.instancePath} ${e.message}</li>`).join("")
+        }</ul>`;
     }
 
     this.onChangeCb?.(data, res);

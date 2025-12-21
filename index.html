@@ -2,66 +2,66 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width" />
-  <title>UI Kit 0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UI Kit 0 – Demo</title>
 
   <link rel="stylesheet" href="./src/ui-kit-0.css" />
 
-  <!-- third_party: offline libs (optional) -->
-  <!-- Wenn du Ajv/Chart nutzen willst, Dateien hier ablegen und diese Zeilen aktiv lassen-->
-  <!--   <script src="./third_party/chart.umd.js"></script-->
-   <!--  <script src="./third_party/ajv2020.js"></script> -->
+  <!-- Third-party (offline, lokal) -->
+  <script src="./src/third_party/ajv2020.js"></script>
 
-  <style>
-    h1 { margin: 0 0 8px 0; font-size: 20px; }
-    .muted { opacity: 0.75; }
-    pre { background: #f6f7f9; padding: 12px; border-radius: 8px; overflow: auto; }
-
-    /* kleine Demo-Layout-Hilfe */
-    .grow { flex: 1 1 420px; }
-  </style>
+  <!-- Optional: Chart.js UMD (falls du es lokal ablegst)
+       Erwartet: window.Chart -->
+  <!-- <script src="./src/third_party/chart.umd.js"></script> -->
 </head>
 
 <body>
 <script type="module">
   import * as UI from "./src/ui-kit-0.js";
 
+  // -----------------------
+  // App Root
+  // -----------------------
   const app = new UI.VGrid().appendTo(document.body);
 
   const header = document.createElement("div");
   header.innerHTML = `
-    <h1>UI Kit 0 – Demo</h1>
+    <h1 style="margin:0;">UI Kit 0 – Demo</h1>
     <div class="muted">
-      Module + CSS laufen. third_party optional: Chart/Ajv werden nur genutzt, wenn geladen.
+      UI-Kit läuft. Ajv/Chart optional. (Ajv: ${!!(window.Ajv2020 || window.ajv2020)} / Chart: ${!!window.Chart})
     </div>
   `;
   app.el.appendChild(header);
 
   const row = new UI.HGrid().appendTo(app);
-  row.el.classList.add("grow");
 
   const left = new UI.Card().appendTo(row);
-  left.el.classList.add("grow");
+  const mid  = new UI.Card().appendTo(row);
+  const right= new UI.Card().appendTo(row);
 
-  const mid = new UI.Card().appendTo(row);
-  mid.el.classList.add("grow");
-
-  const right = new UI.Card().appendTo(row);
-  right.el.classList.add("grow");
+  left.el.style.flex = "1 1 340px";
+  mid.el.style.flex  = "1 1 420px";
+  right.el.style.flex= "1 1 420px";
 
   // -----------------------
-  // State
+  // Store
   // -----------------------
-  const state = {
+  const store = new UI.Store({
     clicks: 0,
-    name: "",
-    agree: false,
+    name: "Alice",
+    agree: true,
+    role: "dev",
+    age: 31,
     people: [
       { id: 1, name: "Alice", age: 31, active: true },
       { id: 2, name: "Bob", age: 24, active: false },
-      { id: 3, name: "Carla", age: 29, active: true }
-    ]
-  };
+      { id: 3, name: "Carla", age: 29, active: true },
+    ],
+    config: {
+      refreshSeconds: 5,
+      featureX: false
+    }
+  });
 
   // -----------------------
   // Left: Controls
@@ -70,37 +70,70 @@
 
   const btnRow = new UI.HGrid().appendTo(left);
 
-  new UI.Button("Click +1")
-    .appendTo(btnRow)
-    .onClick(() => { state.clicks += 1; render(); });
+  new UI.Button("Click +1").appendTo(btnRow).onClick(() => {
+    store.setPath("clicks", (store.get().clicks || 0) + 1);
+  });
 
-  new UI.Button("Add Person")
-    .appendTo(btnRow)
-    .onClick(() => {
-      const id = Math.max(...state.people.map(p => p.id)) + 1;
-      state.people.push({ id, name: state.name || `User${id}`, age: Math.max(0, state.clicks), active: state.agree });
-      render();
-    });
+  new UI.Button("Reset", { variant: "secondary" }).appendTo(btnRow).onClick(() => {
+    store.merge({ clicks: 0 });
+  });
 
+  new UI.Button("Danger", { variant: "danger" }).appendTo(btnRow).onClick(() => {
+    alert("Danger button demo");
+  });
+
+  // Form grid
   const form = document.createElement("div");
-  form.style.display = "grid";
-  form.style.gridTemplateColumns = "160px 1fr";
-  form.style.gap = "8px";
-  form.style.alignItems = "center";
+  form.className = "field";
   form.style.marginTop = "12px";
   left.el.appendChild(form);
 
   // Name
-  form.appendChild(Object.assign(document.createElement("div"), { textContent: "Name" }));
-  const nameField = new UI.TextField("").appendTo(form);
-  nameField.on("input", () => { state.name = nameField.getValue(); render(); });
+  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Name" }));
+  const nameField = new UI.TextField("", { placeholder: "Name…" }).appendTo(form);
+  nameField.bind(store, "name");
 
-  // Agree
-  form.appendChild(Object.assign(document.createElement("div"), { textContent: "Active" }));
-  const agreeWrap = document.createElement("div");
-  form.appendChild(agreeWrap);
-  const agreeBox = new UI.Checkbox(false).appendTo(agreeWrap);
-  agreeBox.on("change", () => { state.agree = agreeBox.getValue(); render(); });
+  // Role (Select)
+  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Role" }));
+  const roleSelect = new UI.Select({
+    options: [
+      { value: "dev", label: "Developer" },
+      { value: "ops", label: "Ops" },
+      { value: "pm",  label: "Product" },
+    ],
+    placeholder: "Bitte wählen…",
+  }).appendTo(form);
+  roleSelect.bind(store, "role");
+
+  // Age (typed Select demo)
+  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Age (typed)" }));
+  const ageSelect = new UI.Select({
+    options: [18, 24, 29, 31, 42, 55],
+    parse: (s) => (s === "" ? null : Number(s)),
+    format: (v) => (v == null ? "" : String(v)),
+    placeholder: "–",
+  }).appendTo(form);
+  ageSelect.bind(store, "age");
+
+  // Checkbox normal
+  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Active (box)" }));
+  const agreeBox = new UI.Checkbox(false).appendTo(form);
+  agreeBox.bind(store, "agree");
+
+  // Checkbox slider
+  form.appendChild(Object.assign(document.createElement("div"), { className: "ui-label", textContent: "Feature X (slider)" }));
+  const fx = new UI.Checkbox(false, { slider: true }).appendTo(form);
+  fx.bind(store, "config.featureX");
+
+  // Add person
+  new UI.Button("Add Person", { variant: "secondary" }).appendTo(left).onClick(() => {
+    const s = store.get();
+    const nextId = Math.max(...s.people.map(p => p.id)) + 1;
+    store.setPath("people", [
+      ...s.people,
+      { id: nextId, name: s.name || `User${nextId}`, age: s.age ?? 0, active: !!s.agree }
+    ]);
+  });
 
   // -----------------------
   // Mid: Table
@@ -112,70 +145,83 @@
       { key: "id", label: "ID", align: "right" },
       { key: "name", label: "Name" },
       { key: "age", label: "Age", align: "right" },
-      { key: "active", label: "Active", format: (v) => v ? "✓" : "—", align: "center" }
-    ],
-    data: state.people
+      { key: "active", label: "Active", align: "center", format: v => v ? "✓" : "—" }
+    ]
   }).appendTo(mid);
 
-  // optional: row click
-  table.onRowClick((row) => {
-    console.log("row clicked:", row);
-  });
+  table.bind(store, "people");
 
   // -----------------------
-  // Right: Debug + optional Chart/Ajv status
+  // Right: JSON editor (Schema validation) + Debug view + Optional Chart
   // -----------------------
-  right.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">Debug</div>`;
+  right.el.innerHTML = `<div style="font-weight:600; margin-bottom:8px;">JSON / Validation / Debug</div>`;
 
-  const status = document.createElement("div");
-  status.className = "muted";
-  right.el.appendChild(status);
+  // Schema for config object
+  const schema = {
+    type: "object",
+    properties: {
+      refreshSeconds: { type: "integer", minimum: 1, maximum: 3600 },
+      featureX: { type: "boolean" }
+    },
+    required: ["refreshSeconds", "featureX"],
+    additionalProperties: false
+  };
 
+  // If Ajv isn't loaded, JsonTextEditor will currently throw via makeValidator().
+  // (After you apply the validation.js fix, it will work with window.ajv2020.)
+  let editor;
+  try {
+    editor = new UI.JsonTextEditor({
+      schema,
+      initialValue: store.get().config,
+      onChange: (data, res) => {
+        // Only apply if valid AND parsed
+        if (res?.ok) store.setPath("config", data);
+      }
+    }).appendTo(right);
+
+    editor.onValid((data) => {
+      // keep UI in sync if someone edits config elsewhere
+      // (optional: you can call editor.setValue(store.get().config) on subscribe)
+    });
+  } catch (e) {
+    const msg = document.createElement("div");
+    msg.className = "ui-help error";
+    msg.textContent = String(e.message || e);
+    right.el.appendChild(msg);
+  }
+
+  // Debug state
   const pre = document.createElement("pre");
+  pre.style.margin = "0";
+  pre.style.whiteSpace = "pre-wrap";
+  pre.style.background = "var(--ui-bg-muted)";
+  pre.style.padding = "10px";
+  pre.style.borderRadius = "8px";
   right.el.appendChild(pre);
 
-  // Optional Chart (only if loaded)
-  let chart = null;
-  const chartHost = document.createElement("div");
-  chartHost.style.marginTop = "12px";
-  right.el.appendChild(chartHost);
+  store.subscribe((s) => {
+    pre.textContent = JSON.stringify(s, null, 2);
+  });
 
-  function ensureChart() {
-    if (chart) return chart;
-    if (!window.Chart) return null;
-
-    const card = document.createElement("div");
-    card.style.marginTop = "12px";
-    chartHost.appendChild(card);
-
-    chart = new UI.ChartView({
+  // Optional Chart
+  if (window.Chart) {
+    const chart = new UI.ChartView({
       type: "bar",
-      data: { labels: ["Clicks"], datasets: [{ label: "clicks", data: [state.clicks] }] }
-    }).appendTo(card);
+      data: { labels: ["Clicks"], datasets: [{ label: "clicks", data: [0] }] },
+      options: { responsive: true }
+    }).appendTo(right);
 
-    return chart;
+    chart.bind(store, (s) => ({
+      labels: ["Clicks"],
+      datasets: [{ label: s.name || "clicks", data: [s.clicks || 0] }]
+    }));
+  } else {
+    const hint = document.createElement("div");
+    hint.className = "ui-help";
+    hint.textContent = "Chart: nicht geladen (optional third_party/chart.umd.js).";
+    right.el.appendChild(hint);
   }
-
-  function render() {
-    // status
-    const hasChart = !!window.Chart;
-    const hasAjv = !!window.Ajv2020;
-    status.textContent = `Chart: ${hasChart ? "OK" : "off"} | Ajv: ${hasAjv ? "OK" : "off"}`;
-
-    // debug json
-    pre.textContent = JSON.stringify(state, null, 2);
-
-    // table refresh
-    table.setData(state.people);
-
-    // chart refresh (if available)
-    const c = ensureChart();
-    if (c) {
-      c.setData({ labels: ["Clicks"], datasets: [{ label: state.name || "clicks", data: [state.clicks] }] });
-    }
-  }
-
-  render();
 </script>
 </body>
 </html>

@@ -22,6 +22,20 @@ export class ChartView extends BaseElement {
       this.cfg
     );
   }
+  
+  bind(store, makeDataFn) {
+    const update = () => {
+      const data = makeDataFn(store.get());
+      if (data) this.setData(data);
+    };
+  
+    // initial
+    update();
+  
+    // update on any change
+    const unsub = store.subscribe(() => update());
+    return unsub;
+  }
 
   setData(data) {
     this.chart.data = data;

@@ -150,3 +150,156 @@ canvas {
     grid-template-columns: 1fr;
   }
 }
+/* ===============================
+   TOGGLE SWITCH (Checkbox Slider)
+   =============================== */
+
+.ui-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+/* echtes Checkbox-Element verstecken */
+.ui-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider-Hintergrund */
+.ui-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #d1d5db;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+/* Slider-Knopf */
+.ui-slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* checked → grün + Knopf nach rechts */
+.ui-switch input:checked + .ui-slider {
+  background-color: var(--ui-accent, #2563eb);
+}
+
+.ui-switch input:checked + .ui-slider::before {
+  transform: translateX(20px);
+}
+
+/* focus (keyboard!) */
+.ui-switch input:focus + .ui-slider {
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.4);
+}
+
+/* disabled */
+.ui-switch input:disabled + .ui-slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   BUTTONS
+   =============================== */
+
+.ui-btn {
+  font: inherit;
+  padding: 8px 14px;
+  border-radius: var(--ui-radius, 8px);
+  border: 1px solid var(--ui-border, #d0d4da);
+  background: var(--ui-accent, #2563eb);
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.ui-btn:hover {
+  filter: brightness(0.95);
+}
+
+.ui-btn:active {
+  filter: brightness(0.9);
+}
+
+.ui-btn.secondary {
+  background: #fff;
+  color: var(--ui-text, #1a1a1a);
+}
+
+.ui-btn.danger {
+  background: var(--ui-error, #b00020);
+  border-color: var(--ui-error, #b00020);
+}
+
+.ui-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ui-btn:focus-visible {
+  outline: 2px solid rgba(37,99,235,0.45);
+  outline-offset: 2px;
+}
+
+/* ===============================
+   INPUTS
+   =============================== */
+
+.ui-label {
+  font-size: 0.95rem;
+  color: var(--ui-text, #1a1a1a);
+}
+
+.ui-input,
+.ui-select,
+.ui-textarea {
+  font: inherit;
+  padding: 8px;
+  border-radius: var(--ui-radius, 8px);
+  border: 1px solid var(--ui-border, #d0d4da);
+  background: #fff;
+  width: 100%;
+}
+
+.ui-textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.ui-input:focus-visible,
+.ui-select:focus-visible,
+.ui-textarea:focus-visible {
+  outline: 2px solid rgba(37,99,235,0.35);
+  outline-offset: 2px;
+}
+
+.ui-input.invalid,
+.ui-select.invalid,
+.ui-textarea.invalid {
+  border-color: var(--ui-error, #b00020);
+}
+
+.ui-help {
+  font-size: 0.9rem;
+  color: var(--ui-text-muted, #6b7280);
+  margin-top: 4px;
+}
+
+.ui-help.error {
+  color: var(--ui-error, #b00020);
+}
