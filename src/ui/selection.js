@@ -23,7 +23,7 @@ export class SelectionGroup extends BaseElement {
 
     // Container for buttons
     this.bar = new HDiv({ gap: 8, wrap, className: "ui-selection-bar" });
-    this.el.appendChild(this.bar.el);
+    this.add(this.bar); // IMPORTANT: owned child => destroy cascade works
 
     this.bar.on("keydown", (e) => this._onKeyDown(e));
   }

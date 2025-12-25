@@ -23,8 +23,7 @@ export class HDiv extends Div {
       flexDirection: "row",
       flexWrap: wrap ? "wrap" : "nowrap",
       gap: typeof gap === "number" ? `${gap}px` : gap,
-      alignItems: align,
-      ...style
+      alignItems: align
     });
   }
 }
@@ -35,8 +34,7 @@ export class VDiv extends Div {
     this.setStyle({
       display: "flex",
       flexDirection: "column",
-      gap: typeof gap === "number" ? `${gap}px` : gap,
-      ...style
+      gap: typeof gap === "number" ? `${gap}px` : gap
     });
   }
 }
@@ -80,10 +78,15 @@ export class Card extends BaseElement {
     this.header.className = "ui-card-header";
     this.body = document.createElement("div");
     this.body.className = "ui-card-body";
-
+    this.setStyle({
+      border: "1px solid #ccc",
+      borderRadius: "6px",
+      padding: "8px",
+      background: "#fff"
+    });
     this.el.append(this.header, this.body);
 
-    if (title) this.setTitle(title);
+    this.header.textContent = title ?? "";
   }
 
   setTitle(title) {
@@ -91,8 +94,31 @@ export class Card extends BaseElement {
     return this;
   }
 
+  /**
+   * Add content to the card body (NOT the root).
+   * This keeps the internal structure consistent:
+   *   .card
+   *     .ui-card-header
+   *     .ui-card-body  <-- children go here
+   */
   add(child) {
-    this.body.appendChild(child?.el ?? child);
+    if (!child) return this;
+    this.body.appendChild(child.el ?? child);
+    return this;
+  }
+
+  /**
+   * Convenience alias (optional): same as add().
+   */
+  append(child) {
+    return this.add(child);
+  }
+
+  /**
+   * Convenience: clear body content.
+   */
+  clear() {
+    this.body.textContent = "";
     return this;
   }
 }

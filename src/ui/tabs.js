@@ -39,7 +39,9 @@ export class Tabs extends BaseElement {
     this.dropdown.addEventListener("change", onDropChange);
     this.own(() => this.dropdown.removeEventListener("change", onDropChange));
     
-    // IMPORTANT: make sub-widgets "owned children" so their destroy() runs
+    // Panels container (owned child)
+    this.panels = new VDiv({ className: "ui-tabpanels" });
+
     // (SelectionGroup has listeners; panels may have future resources)
     this.add(this.group);                 // instead of appendChild(this.group.el)
     this.el.appendChild(this.dropdown);   // dropdown is a raw element, so keep it as-is

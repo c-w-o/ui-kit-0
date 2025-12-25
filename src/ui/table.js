@@ -10,7 +10,8 @@ export class TableView extends BaseElement {
     this.table = document.createElement("table");
     this.table.className = "ui-table";
     if (zebra) this.table.classList.add("zebra");
-    
+    this.table.style.borderCollapse = "collapse";
+    this.table.style.width = "100%";
 
     this.thead = document.createElement("thead");
     this.tbody = document.createElement("tbody");
@@ -61,6 +62,8 @@ export class TableView extends BaseElement {
 
     for (const col of this.columns) {
       const th = document.createElement("th");
+      th.style.border = "1px solid #ccc";
+      th.style.padding = "4px 6px";
       th.textContent = col.label ?? col.key ?? "";
       if (col.align) th.style.textAlign = col.align;
       tr.appendChild(th);
@@ -74,7 +77,8 @@ export class TableView extends BaseElement {
 
     for (const row of this.data) {
       const tr = document.createElement("tr");
-
+      tr.style.border = "1px solid #ccc";
+      tr.style.padding = "4px 6px";
       tr.addEventListener("click", () => {
         this.rowClickCb?.(row);
       });

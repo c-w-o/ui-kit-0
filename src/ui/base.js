@@ -4,6 +4,11 @@ export class BaseElement {
     this._cleanup = [];
     this._children = [];
     this._destroyed = false;
+    
+    // ---- CSS fallback defaults (very minimal) ----
+    this.el.style.boxSizing = "border-box";
+    this.el.style.fontFamily = "system-ui, sans-serif";
+    this.el.style.fontSize = "14px";
   }
 
   appendTo(parent) {
@@ -14,7 +19,12 @@ export class BaseElement {
   setText(text) { this.el.textContent = text ?? ""; return this; }
 
   setStyle(obj) {
-    for (const [k, v] of Object.entries(obj || {})) this.el.style[k] = v;
+    for (const [k, v] of Object.entries(obj || {})) {
+      // Do not override existing inline styles unless explicitly set
+      if (this.el.style[k] === "") {
+        this.el.style[k] = v;
+      }
+    }
     return this;
   }
 
