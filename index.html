@@ -1,376 +1,589 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>UI Kit 0 – Widget Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UI Kit 0 – Full Demo</title>
 
-  <!-- Fallback styling: keeps the demo usable even if src/ui-kit-0.css is missing -->
+  <link rel="stylesheet" href="./src/ui-kit-0.css" />
   <style>
-    :root { color-scheme: light dark; }
-    body { margin: 0; padding: 16px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .muted { opacity: .75; }
-    .card { border: 1px solid rgba(127,127,127,.35); border-radius: 10px; overflow: hidden; }
-    .ui-card-header { padding: 10px 12px; font-weight: 700; border-bottom: 1px solid rgba(127,127,127,.25); }
-    .ui-card-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-    .ui-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(127,127,127,.55); background: rgba(127,127,127,.15); cursor: pointer; }
-    .ui-input, .ui-select { padding: 8px; border-radius: 8px; border: 1px solid rgba(127,127,127,.55); width: 100%; box-sizing: border-box; background: transparent; color: inherit; }
-    .ui-formgrid { display: grid; grid-template-columns: 160px 1fr; gap: 10px; align-items: center; }
-    .ui-table { width: 100%; border-collapse: collapse; border: 1px solid rgba(127,127,127,.35); border-radius: 10px; overflow: hidden; }
-    .ui-table th, .ui-table td { padding: 8px 10px; border-bottom: 1px solid rgba(127,127,127,.2); }
-    .ui-table thead th { text-align: left; border-bottom: 1px solid rgba(127,127,127,.35); }
-    .ui-table.zebra tbody tr:nth-child(odd)  { background: rgba(0,0,0,0.03); }
-    .ui-table.zebra tbody tr:nth-child(even) { background: rgba(255,255,255,0.00); }
-    .ui-table tbody tr:hover { background: rgba(120,180,255,0.10); }
-    .ui-tabs .ui-tabselect { display: none; }
-    .ui-tabs.dropdown-mode .ui-tabbar { display: none; }
-    .ui-tabs.dropdown-mode .ui-tabselect { display: inline-block; width: 100%; padding: 8px; border-radius: 8px; border: 1px solid rgba(127,127,127,.35); }
-    .ui-tabbar { display: flex; gap: 8px; flex-wrap: nowrap; overflow: auto; padding-bottom: 4px; }
-    .ui-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
-    .ui-switch input { display: none; }
-    .ui-slider { width: 42px; height: 22px; border-radius: 999px; border: 1px solid rgba(127,127,127,.55); position: relative; background: rgba(127,127,127,.20); }
-    .ui-slider::after { content: ""; width: 18px; height: 18px; border-radius: 50%; position: absolute; top: 1px; left: 1px; background: rgba(255,255,255,.75); }
-    .ui-switch input:checked + .ui-slider::after { left: 21px; }
-    @media (max-width: 820px) { .ui-formgrid { grid-template-columns: 1fr; } }
+    /* Kleine Ergänzungen nur für die Demo-Seite */
+    .app { max-width: 1200px; margin: 0 auto; padding: 12px; }
+    .hint { font-size: 12px; opacity: 0.8; }
+    .pill { display:inline-block; padding:2px 8px; border:1px solid rgba(0,0,0,0.15); border-radius:999px; font-size:12px; }
+    .kpi { display:flex; gap:10px; flex-wrap:wrap; }
+    .kpi .pill { background: rgba(37,99,235,0.06); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
   </style>
 
-  <!-- Project styling (overrides fallback). If this file is missing, the fallback above remains. -->
-  <link rel="stylesheet" href="./src/ui-kit-0.css">
+  <!-- third_party: Ajv2020 (setzt window.ajv2020) -->
+  <script src="./src/third_party/ajv2020.js"></script>
 
-  <script>
-    // Helpful for mobile/Termux debugging
-    window.addEventListener("error", (e) => {
-      console.log("GLOBAL ERROR:", e.message, e.filename, e.lineno, e.colno);
-    });
-  </script>
+  <!-- third_party: Chart.js UMD (setzt window.Chart) -->
+  <script src="./src/third_party/chart.umd.min.js"></script>
 </head>
 
 <body>
-<script type="module">
-  import * as UI from "./src/ui-kit-0.js";
+  <div id="app"></div>
 
-  // -----------------------------
-  // State
-  // -----------------------------
-  const store = new UI.Store({
-    clicks: 0,
-    name: "Alice",
-    age: 31,
-    role: "dev",
-    agree: true,
-    config: { zebra: true, featureX: false },
-    people: [
-      { id: 1, name: "Alice", age: 31, active: true },
-      { id: 2, name: "Bob",   age: 24, active: false },
-      { id: 3, name: "Carla", age: 29, active: true },
-    ],
-  });
+  <script type="module">
+    import * as UI from "./src/ui-kit-0.js";
 
-  // -----------------------------
-  // Root
-  // -----------------------------
-  const app = new UI.VDiv({ gap: 12, style: { maxWidth: "1100px", margin: "0 auto" } })
-    .appendTo(document.body);
-
-  // Header card (uses Card.add)
-  const header = new UI.Card({ title: "UI Kit 0 – Widget Demo (no charts, no json-editor)" });
-  header.add(new UI.Text(
-    "Shows: Store, Tabs, Card.add, Div/HDiv/VDiv, HSpacer/VSpacer, Button, TextField, Checkbox (box + slider), Select, TableView, SelectionGroup, Text/Label/Heading/Pre.",
-    { muted: true }
-  ));
-  app.add(header);
-
-  // Main surface
-  const surface = new UI.Card({ title: "Demo" });
-  surface.setStyle({ });
-  app.add(surface);
-
-  // Tabs (SelectionGroup-driven)
-  const tabs = new UI.Tabs({ active: "controls" });
-  surface.add(tabs);
-
-  // Small helper: build a form grid row without raw createElement in this page
-  function addField(formGrid, labelText, control) {
-    formGrid.add(new UI.Label(labelText));
-    formGrid.el.appendChild(control?.el ?? control);
-  }
-
-  // -----------------------------
-  // Tab: Controls
-  // -----------------------------
-  tabs.addTab("controls", "Controls", () => {
-    const root = new UI.VDiv({ gap: 12 });
-
-    const row = new UI.HDiv({ gap: 12, wrap: true, align: "stretch" });
-    root.add(row);
-
-    const left  = new UI.Card({ title: "Form (bind → Store)" }).setStyle({ flex: "1 1 420px" });
-    const right = new UI.Card({ title: "Live state (Store → UI)" }).setStyle({ flex: "1 1 420px" });
-    row.add(left);
-    row.add(right);
-
-    // Form grid
-    const formGrid = new UI.Div({ className: "ui-formgrid" });
-    left.add(formGrid);
-
-    const nameField = new UI.TextField("", { placeholder: "Name…" }).bind(store, "name");
-    addField(formGrid, "Name", nameField);
-
-    const roleSelect = new UI.Select({
-      options: [
-        { value: "dev", label: "Developer" },
-        { value: "ops", label: "Ops" },
-        { value: "pm",  label: "Product" },
-        { value: "qa",  label: "QA" },
+    // -----------------------
+    // Demo State
+    // -----------------------
+    const store = new UI.Store({
+      clicks: 0,
+      name: "Alice",
+      role: "dev",
+      age: 31,
+      agree: true,
+      config: {
+        featureX: false,
+        zebra: true,
+        themeDense: false,
+      },
+      people: [
+        { id: 1, name: "Alice", age: 31, active: true },
+        { id: 2, name: "Bob", age: 24, active: false },
+        { id: 3, name: "Carla", age: 29, active: true },
       ],
-      placeholder: "Bitte wählen…",
-    }).bind(store, "role");
-    addField(formGrid, "Role", roleSelect);
 
-    const ageSelect = new UI.Select({
-      options: [18, 24, 29, 31, 42, 55],
-      parse: (s) => (s === "" ? null : Number(s)),
-      format: (v) => (v == null ? "" : String(v)),
-      placeholder: "–",
-    }).bind(store, "age");
-    addField(formGrid, "Age (typed)", ageSelect);
+      // chart-related demo buffers
+      metrics: {
+        // For bar/pie
+        countsByRole: { dev: 2, ops: 1, pm: 0, qa: 0 },
+        // For line chart (optional: can be fed by polling bundles)
+        samples: [], // [{tsMs, values:{cpu,mem}}]
+      },
 
-    // Checkbox is a wrapper <label> now (styled), with optional slider mode
-    const agreeBox = new UI.Checkbox(false, { label: "Active", slider: false }).bind(store, "agree");
-    addField(formGrid, "Active (checkbox)", agreeBox);
-
-    const featureX = new UI.Checkbox(false, { label: "Feature X", slider: true }).bind(store, "config.featureX");
-    addField(formGrid, "Feature X (switch)", featureX);
-
-    // Actions
-    const actions = new UI.HDiv({ gap: 8, wrap: true });
-    left.add(actions);
-
-    actions.add(new UI.Button("Click +1", { variant: "primary" }).onClick(() => {
-      store.setPath("clicks", (store.get().clicks ?? 0) + 1);
-    }));
-
-    actions.add(new UI.Button("Add Person", { variant: "secondary" }).onClick(() => {
-      const s = store.get();
-      const maxId = Math.max(0, ...s.people.map(p => p.id));
-      const id = maxId + 1;
-      store.setPath("people", [
-        ...s.people,
-        { id, name: s.name || `User${id}`, age: Number(s.age ?? 0), active: !!s.agree },
-      ]);
-    }));
-
-    actions.add(new UI.Button("Toggle Zebra (table)", { variant: "secondary" }).onClick(() => {
-      store.setPath("config.zebra", !(store.get().config?.zebra !== false));
-    }));
-
-    actions.add(new UI.Button("Reset", { variant: "danger" }).onClick(() => {
-      store.set({
-        ...store.get(),
-        clicks: 0,
-        name: "Alice",
-        age: 31,
-        role: "dev",
-        agree: true,
-        config: { zebra: true, featureX: false },
-      });
-    }));
-
-    // Right: live state
-    const status = new UI.Text("", { muted: true });
-    const dump = new UI.Pre("");
-
-    right.add(status);
-    right.add(dump);
-
-    function renderState() {
-      const s = store.get();
-      status.setText(`clicks=${s.clicks} | name=${s.name} | role=${s.role} | age=${s.age} | agree=${s.agree}`);
-      dump.setText(JSON.stringify(s, null, 2));
-    }
-    renderState();
-    store.subscribe(() => renderState());
-
-    return root;
-  });
-
-  // -----------------------------
-  // Tab: Table
-  // -----------------------------
-  tabs.addTab("table", "Table", () => {
-    const root = new UI.VDiv({ gap: 12 });
-
-    const headRow = new UI.HDiv({ gap: 12, wrap: true, align: "center" });
-    root.add(headRow);
-
-    headRow.add(new UI.Heading("People", { level: 3 }));
-    headRow.add(new UI.HSpacer());
-    const zebraInfo = new UI.Text("", { muted: true });
-    headRow.add(zebraInfo);
-
-    const tableCard = new UI.Card({ title: "TableView (bind → people)" }).setStyle({ padding: "0" });
-    root.add(tableCard);
-
-    const table = new UI.TableView({
-      columns: [
-        { key: "id", label: "ID", align: "right" },
-        { key: "name", label: "Name" },
-        { key: "age", label: "Age", align: "right" },
-        { key: "active", label: "Active", align: "center", format: (v) => (v ? "✓" : "—") },
-      ],
-      data: [],
-      zebra: true,
+      // json editor demo data
+      jsonConfig: {
+        service: { host: "localhost", port: 8080 },
+        flags: { featureX: false },
+        thresholds: { cpuWarn: 70, memWarn: 70 },
+      }
     });
 
-    // IMPORTANT: table goes into Card body via Card.add
-    tableCard.add(table);
-
-    table.bind(store, "people");
-
-    table.onRowClick((row) => {
-      store.setPath("name", row.name);
-      store.setPath("age", row.age);
-      store.setPath("agree", !!row.active);
-      tabs.setActive("controls");
-    });
-
-    function syncZebra() {
-      const on = store.get().config?.zebra !== false;
-      zebraInfo.setText(`zebra=${on ? "on" : "off"} (toggle in Controls)`);
-      table.setZebra(on);
+    // A tiny helper: recompute countsByRole from people
+    function recomputeCountsByRole() {
+      // not all people have role in demo; map active/age → role for some fun
+      const people = store.get().people || [];
+      const counts = { dev: 0, ops: 0, pm: 0, qa: 0 };
+      for (const p of people) {
+        const r =
+          (p.age ?? 0) >= 40 ? "pm" :
+          (p.age ?? 0) >= 30 ? "dev" :
+          (p.age ?? 0) >= 25 ? "ops" : "qa";
+        counts[r] = (counts[r] || 0) + 1;
+      }
+      store.setPath("metrics.countsByRole", counts);
     }
-    syncZebra();
-    store.subscribe(() => syncZebra());
+    recomputeCountsByRole();
+    store.subscribePath("people", () => recomputeCountsByRole());
 
-    return root;
-  });
+    // -----------------------
+    // Root layout
+    // -----------------------
+    const app = new UI.VDiv({ gap: 12, className: "app" }).appendTo(document.getElementById("app"));
 
-  // -----------------------------
-  // Tab: SelectionGroup
-  // -----------------------------
-  tabs.addTab("selection", "Selection", () => {
-    const root = new UI.VDiv({ gap: 12 });
-
-    root.add(new UI.Heading("SelectionGroup", { level: 3 }));
-    root.add(new UI.Text(
-      "Button-based selection; keyboard: ← → Home End; roving tabindex; ARIA role=tab.",
+    const header = new UI.Card({ title: "" }).appendTo(app);
+    new UI.Heading("UI Kit 0 – Full Demo", { level: 2 }).appendTo(header);
+    new UI.Text(
+      `Version: ${UI.UI_KIT_VERSION} • Offline Demo (AJV + Chart.js lokal)`,
       { muted: true }
-    ));
+    ).appendTo(header);
 
-    const card = new UI.Card({ title: "Pick role (writes to store.role)" });
-    root.add(card);
+    const kpi = new UI.Div({ className: "kpi" }).appendTo(header);
+    const kpiClicks = document.createElement("span");
+    kpiClicks.className = "pill mono";
+    const kpiPeople = document.createElement("span");
+    kpiPeople.className = "pill mono";
+    const kpiRole = document.createElement("span");
+    kpiRole.className = "pill mono";
+    kpi.el.append(kpiClicks, kpiPeople, kpiRole);
 
-    const group = new UI.SelectionGroup({ active: store.get().role || "dev", wrap: true });
-    group.addItem("dev", "Developer");
-    group.addItem("ops", "Ops");
-    group.addItem("pm",  "Product");
-    group.addItem("qa",  "QA");
-
-    const out = new UI.Text("", { muted: true });
-
-    card.add(group);
-    card.add(out);
-
-    function sync() {
-      const active = group.getActive();
-      out.setText(`active=${active}`);
-      store.setPath("role", active);
-    }
-    group.onChange(() => sync());
-    sync();
-
-    return root;
-  });
-
-  // -----------------------------
-  // Tab: Layout primitives
-  // -----------------------------
-  tabs.addTab("layout", "Layout", () => {
-    const root = new UI.VDiv({ gap: 12 });
-
-    root.add(new UI.Heading("Layout primitives", { level: 3 }));
-    root.add(new UI.Text("HDiv / VDiv / Div / HSpacer / VSpacer / Card.add / setStyle.", { muted: true }));
-
-    const row = new UI.HDiv({ gap: 12, wrap: true, align: "stretch" });
-    root.add(row);
-
-    const a = new UI.Card({ title: "Card A" }).setStyle({ flex: "1 1 260px" });
-    a.add(new UI.Text("This card grows and wraps.", { muted: true }));
-    row.add(a);
-
-    const b = new UI.Card({ title: "Card B" }).setStyle({ flex: "2 1 360px" });
-    b.add(new UI.Text("Spacer row inside:", { muted: true }));
-    const spacerRow = new UI.HDiv({ gap: 8, wrap: false, align: "center" });
-    spacerRow.add(new UI.Button("Left", { variant: "secondary" }));
-    spacerRow.add(new UI.HSpacer());
-    spacerRow.add(new UI.Button("Right", { variant: "secondary" }));
-    b.add(spacerRow);
-    row.add(b);
-
-    const c = new UI.Card({ title: "VDiv stack" }).setStyle({ flex: "1 1 260px" });
-    const stack = new UI.VDiv({ gap: 8 });
-    stack.add(new UI.Text("Row 1"));
-    stack.add(new UI.Text("Row 2"));
-    stack.add(new UI.Text("Row 3"));
-    c.add(stack);
-    row.add(c);
-
-    // VSpacer demo (simple)
-    const v = new UI.Card({ title: "VSpacer demo" });
-    const box = new UI.VDiv({ gap: 8, style: { height: "140px", border: "1px dashed rgba(127,127,127,.35)", padding: "8px", borderRadius: "10px" } });
-    box.add(new UI.Text("Top"));
-    box.add(new UI.VSpacer({ flex: 1 }));
-    box.add(new UI.Text("Bottom (pushed by VSpacer)"));
-    v.add(box);
-    root.add(v);
-
-    return root;
-  });
-
-  // -----------------------------
-  // Tab: Store / Diagnostics
-  // -----------------------------
-  tabs.addTab("store", "Store", () => {
-    const root = new UI.VDiv({ gap: 12 });
-
-    root.add(new UI.Heading("Store API", { level: 3 }));
-    root.add(new UI.Text("Shows get(), getPath(), setPath(), subscribe(), subscribePath().", { muted: true }));
-
-    const card = new UI.Card({ title: "Live dump" });
-    root.add(card);
-
-    const line = new UI.Text("", { muted: true });
-    const pre  = new UI.Pre("");
-
-    card.add(line);
-    card.add(pre);
-
-    function render() {
+    function renderKpis() {
       const s = store.get();
-      line.setText(`changed | clicks=${s.clicks} | people=${s.people.length} | role=${s.role}`);
-      pre.setText(JSON.stringify(s, null, 2));
+      kpiClicks.textContent = `clicks=${s.clicks}`;
+      kpiPeople.textContent = `people=${(s.people || []).length}`;
+      kpiRole.textContent = `role=${s.role}`;
     }
-    render();
-    store.subscribe(() => render());
+    renderKpis();
+    store.subscribe(() => renderKpis());
 
-    const controls = new UI.HDiv({ gap: 8, wrap: true });
-    controls.add(new UI.Button("people.pop()", { variant: "secondary" }).onClick(() => {
-      const s = store.get();
-      store.setPath("people", s.people.slice(0, -1));
-    }));
-    controls.add(new UI.Button("people.clear()", { variant: "danger" }).onClick(() => {
-      store.setPath("people", []);
-    }));
-    card.add(controls);
+    // -----------------------
+    // Main surface + Tabs
+    // -----------------------
+    const surface = new UI.Card({ title: "" }).appendTo(app).setStyle({ padding: "14px" });
 
-    return root;
-  });
+    const tabs = new UI.Tabs({ active: "controls" }).appendTo(surface);
 
-  // Ensure first tab is active (Tabs will lazy-build panels)
-  tabs.setActive("controls");
-</script>
+    // -----------------------
+    // TAB: Controls + Store binding + live state
+    // -----------------------
+    tabs.addTab("controls", "Controls", () => {
+      const root = new UI.VDiv({ gap: 12 });
+
+      const row = new UI.HDiv({ gap: 12, wrap: true, align: "stretch" }).appendTo(root);
+
+      const left = new UI.Card({ title: "Form + Actions" })
+        .appendTo(row)
+        .setStyle({ flex: "1 1 360px", minWidth: "300px" });
+
+      const right = new UI.Card({ title: "Live state (JSON)" })
+        .appendTo(row)
+        .setStyle({ flex: "1 1 360px", minWidth: "300px" });
+
+      // Actions
+      const btnRow = new UI.HDiv({ gap: 8, wrap: true }).appendTo(left);
+
+      new UI.Button("Click +1").appendTo(btnRow).onClick(() => {
+        store.setPath("clicks", (store.get().clicks || 0) + 1);
+      });
+
+      new UI.Button("Reset clicks", { variant: "secondary" }).appendTo(btnRow).onClick(() => {
+        store.setPath("clicks", 0);
+      });
+
+      new UI.Button("Danger (alert)", { variant: "danger" }).appendTo(btnRow).onClick(() => {
+        alert("Danger button demo");
+      });
+
+      // Form grid (Label + Control)
+      const grid = new UI.Div({
+        style: {
+          display: "grid",
+          gridTemplateColumns: "160px 1fr",
+          gap: "8px",
+          alignItems: "center",
+          marginTop: "10px",
+        },
+      }).appendTo(left);
+
+      function addField(label, control) {
+        new UI.Label(label).appendTo(grid);
+        grid.el.appendChild(control.el ?? control);
+      }
+
+      const name = new UI.TextField("", { placeholder: "Name…" }).bind(store, "name");
+      addField("Name", name);
+
+      const role = new UI.Select({
+        options: [
+          { value: "dev", label: "Developer" },
+          { value: "ops", label: "Ops" },
+          { value: "pm",  label: "Product" },
+          { value: "qa",  label: "QA" },
+        ],
+        placeholder: "Bitte wählen…",
+      }).bind(store, "role");
+      addField("Role", role);
+
+      const age = new UI.Select({
+        options: [18, 24, 29, 31, 42, 55],
+        parse: (s) => (s === "" ? null : Number(s)),
+        format: (v) => (v == null ? "" : String(v)),
+        placeholder: "–",
+      }).bind(store, "age");
+      addField("Age (typed)", age);
+
+      const agree = new UI.Checkbox(false).bind(store, "agree");
+      addField("Active (box)", agree);
+
+      const fx = new UI.Checkbox(false, { slider: true }).bind(store, "config.featureX");
+      addField("Feature X (slider)", fx);
+
+      const dense = new UI.Checkbox(false, { slider: true }).bind(store, "config.themeDense");
+      addField("Dense mode (demo)", dense);
+
+      // Dense mode: simply adjust css vars on body to show "theming via state"
+      function syncDense() {
+        const on = !!store.get().config?.themeDense;
+        document.documentElement.style.setProperty("--ui-padding", on ? "8px" : "12px");
+        document.documentElement.style.setProperty("--ui-gap", on ? "8px" : "12px");
+      }
+      syncDense();
+      store.subscribe(() => syncDense());
+
+      // Live state
+      const status = new UI.Text("", { muted: true }).appendTo(right);
+      const dump = new UI.Pre("").appendTo(right);
+
+      function renderState() {
+        const s = store.get();
+        status.setText(`clicks=${s.clicks} | name=${s.name} | role=${s.role} | age=${s.age} | agree=${s.agree}`);
+        dump.setText(JSON.stringify(s, null, 2));
+      }
+      renderState();
+      store.subscribe(() => renderState());
+
+      // Helper actions
+      const actions = new UI.HDiv({ gap: 8, wrap: true }).appendTo(left).setStyle({ marginTop: "10px" });
+
+      new UI.Button("Add Person", { variant: "secondary" }).appendTo(actions).onClick(() => {
+        const s = store.get();
+        const maxId = Math.max(0, ...(s.people || []).map(p => p.id));
+        const id = maxId + 1;
+        const nextPerson = { id, name: s.name || `User${id}`, age: Number(s.age ?? 0), active: !!s.agree };
+        store.set({ ...s, people: [...(s.people || []), nextPerson] });
+      });
+
+      new UI.Button("Toggle zebra", { variant: "secondary" }).appendTo(actions).onClick(() => {
+        store.setPath("config.zebra", !store.get().config?.zebra);
+      });
+
+      new UI.Button("Randomize ages", { variant: "secondary" }).appendTo(actions).onClick(() => {
+        const s = store.get();
+        const people = (s.people || []).map(p => ({ ...p, age: 18 + Math.floor(Math.random() * 40) }));
+        store.setPath("people", people);
+      });
+
+      return root;
+    });
+
+    // -----------------------
+    // TAB: Table
+    // -----------------------
+    tabs.addTab("table", "Table", () => {
+      const root = new UI.VDiv({ gap: 12 });
+
+      const top = new UI.HDiv({ gap: 12, wrap: true, align: "center" }).appendTo(root);
+      new UI.Heading("People", { level: 3 }).appendTo(top);
+      new UI.HSpacer().appendTo(top);
+
+      const zebraInfo = new UI.Text("", { muted: true }).appendTo(top);
+
+      const card = new UI.Card({ title: "Click row → fill form (name/age/active)" }).appendTo(root);
+
+      const table = new UI.TableView({
+        columns: [
+          { key: "id", label: "ID", align: "right" },
+          { key: "name", label: "Name" },
+          { key: "age", label: "Age", align: "right" },
+          { key: "active", label: "Active", align: "center", format: (v) => (v ? "✓" : "—") },
+        ],
+        data: [],
+        zebra: true,
+      }).appendTo(card);
+
+      table.bind(store, "people");
+      table.onRowClick((row) => {
+        store.setPath("name", row.name);
+        store.setPath("age", row.age);
+        store.setPath("agree", !!row.active);
+      });
+
+      function syncZebra() {
+        const on = !!store.get().config?.zebra;
+        zebraInfo.setText(`zebra=${on ? "on" : "off"} (toggle in Controls tab)`);
+        table.setZebra(on);
+      }
+      syncZebra();
+      store.subscribe(() => syncZebra());
+
+      return root;
+    });
+
+    // -----------------------
+    // TAB: SelectionGroup
+    // -----------------------
+    tabs.addTab("selection", "Selection", () => {
+      const root = new UI.VDiv({ gap: 12 });
+
+      new UI.Heading("SelectionGroup", { level: 3 }).appendTo(root);
+      new UI.Text("Keyboard: ← → Home End (roving focus). Change syncs into store.role.", { muted: true }).appendTo(root);
+
+      const card = new UI.Card({ title: "Role" }).appendTo(root);
+
+      const group = new UI.SelectionGroup({ active: store.get().role, wrap: true }).appendTo(card);
+      group.addItem("dev", "Developer");
+      group.addItem("ops", "Ops");
+      group.addItem("pm",  "Product");
+      group.addItem("qa",  "QA");
+
+      const out = new UI.Text("", { muted: true }).appendTo(card);
+
+      function sync() {
+        const active = group.getActive();
+        out.setText(`active=${active}`);
+        store.setPath("role", active);
+      }
+      group.onChange(() => sync());
+      sync();
+
+      // Also react to store.role changes (e.g. from other tabs)
+      card.own(store.subscribePath("role", (val) => group.setActive(val)));
+
+      return root;
+    });
+
+    // -----------------------
+    // TAB: JSON Editor + AJV validation
+    // -----------------------
+    tabs.addTab("json", "JSON Editor", () => {
+      const root = new UI.VDiv({ gap: 12 });
+
+      new UI.Heading("JsonTextEditor + AJV (2020)", { level: 3 }).appendTo(root);
+      new UI.Text("Validiert live gegen ein Schema. Valid JSON wird in store.jsonConfig geschrieben.", { muted: true }).appendTo(root);
+
+      const schema = {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        additionalProperties: false,
+        required: ["service", "flags", "thresholds"],
+        properties: {
+          service: {
+            type: "object",
+            additionalProperties: false,
+            required: ["host", "port"],
+            properties: {
+              host: { type: "string", minLength: 1 },
+              port: { type: "integer", minimum: 1, maximum: 65535 },
+            },
+          },
+          flags: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              featureX: { type: "boolean" },
+            },
+          },
+          thresholds: {
+            type: "object",
+            additionalProperties: false,
+            required: ["cpuWarn", "memWarn"],
+            properties: {
+              cpuWarn: { type: "number", minimum: 0, maximum: 100 },
+              memWarn: { type: "number", minimum: 0, maximum: 100 },
+            },
+          },
+        },
+      };
+
+      const card = new UI.Card({ title: "Config JSON" }).appendTo(root);
+
+      const editor = new UI.JsonTextEditor({
+        schema,
+        initialValue: store.get().jsonConfig,
+        onChange: (data, res) => {
+          // Only write valid configs to state
+          if (res?.ok) store.setPath("jsonConfig", data);
+        }
+      });
+      card.add(editor);
+
+      const preview = new UI.Card({ title: "Live (valid only)" }).appendTo(root);
+      const out = new UI.Pre("").appendTo(preview);
+
+      function render() {
+        out.setText(JSON.stringify(store.get().jsonConfig, null, 2));
+      }
+      render();
+      preview.own(store.subscribePath("jsonConfig", () => render()));
+
+      return root;
+    });
+
+    // -----------------------
+    // TAB: Charts
+    // -----------------------
+    tabs.addTab("charts", "Charts", () => {
+      const root = new UI.VDiv({ gap: 12 });
+
+      new UI.Heading("Charts (Chart.js wrapper)", { level: 3 }).appendTo(root);
+      new UI.Text("Line: capped 600 points, no point markers. Bar + Doughnut from derived state.", { muted: true }).appendTo(root);
+
+      const row = new UI.HDiv({ gap: 12, wrap: true, align: "stretch" }).appendTo(root);
+
+      // Line chart
+      const line = new UI.LineChartCard({
+        title: "CPU / MEM (Line, no points, max 600)",
+        maxPoints: 600,
+        height: 280,
+        datasets: [
+          { label: "cpu", data: [] },
+          { label: "mem", data: [] },
+        ],
+        options: {
+          scales: { y: { suggestedMin: 0, suggestedMax: 100 } }
+        }
+      }).appendTo(row).setStyle({ flex: "2 1 520px", minWidth: "320px" });
+
+      // Bar chart
+      const bar = new UI.BarChartCard({
+        title: "People by derived role (Bar)",
+        height: 280,
+      }).appendTo(row).setStyle({ flex: "1 1 320px", minWidth: "280px" });
+
+      // Doughnut chart
+      const pie = new UI.PieChartCard({
+        title: "Same distribution (Doughnut)",
+        height: 280,
+        doughnut: true,
+      }).appendTo(row).setStyle({ flex: "1 1 320px", minWidth: "280px" });
+
+      // Bind bar/pie to store.metrics.countsByRole
+      function mapCountsToChartData(counts) {
+        const labels = ["dev", "ops", "pm", "qa"];
+        const values = labels.map(k => counts?.[k] ?? 0);
+        return {
+          labels,
+          datasets: [{ label: "count", data: values }]
+        };
+      }
+
+      bar.bind(store, (s) => mapCountsToChartData(s.metrics?.countsByRole));
+      pie.bind(store, (s) => mapCountsToChartData(s.metrics?.countsByRole));
+
+      // Live line chart feed controls
+      const controls = new UI.Card({ title: "Line feed controls" }).appendTo(root);
+      const ctrlRow = new UI.HDiv({ gap: 8, wrap: true, align: "center" }).appendTo(controls);
+
+      const feedInfo = new UI.Text("", { muted: true }).appendTo(controls);
+
+      let timer = null;
+
+      function setFeedInfo() {
+        feedInfo.setText(timer
+          ? "Feeding: 1 sample/sec (pushSample with timestamp)"
+          : "Feeding: off");
+      }
+      setFeedInfo();
+
+      new UI.Button("Start feed").appendTo(ctrlRow).onClick(() => {
+        if (timer) return;
+        timer = setInterval(() => {
+          const cpu = Math.round(30 + Math.random() * 60);
+          const mem = Math.round(20 + Math.random() * 70);
+          line.pushSample({ tsMs: Date.now(), values: { cpu, mem } });
+
+          // also keep a "bundle" in store.metrics.samples (optional demo)
+          const samples = store.get().metrics?.samples || [];
+          samples.push({ tsMs: Date.now(), values: { cpu, mem } });
+          // cap the stored bundle too (keep it sane)
+          while (samples.length > 600) samples.shift();
+          store.setPath("metrics.samples", samples);
+        }, 1000);
+        setFeedInfo();
+      });
+
+      new UI.Button("Stop feed", { variant: "secondary" }).appendTo(ctrlRow).onClick(() => {
+        if (!timer) return;
+        clearInterval(timer);
+        timer = null;
+        setFeedInfo();
+      });
+
+      new UI.Button("Clear line", { variant: "secondary" }).appendTo(ctrlRow).onClick(() => {
+        line.setData({ labels: [], datasets: [{ label: "cpu", data: [] }, { label: "mem", data: [] }] });
+        store.setPath("metrics.samples", []);
+      });
+
+      new UI.Button("Load from bundle", { variant: "secondary" }).appendTo(ctrlRow).onClick(() => {
+        // Demonstrate: backend could deliver a polled bundle
+        const samples = store.get().metrics?.samples || [];
+        line.setSamples(samples);
+      });
+
+      // Cleanup on destroy (tab switch rebuild etc.)
+      root.own(() => {
+        if (timer) clearInterval(timer);
+        timer = null;
+      });
+
+      return root;
+    });
+
+    // -----------------------
+    // TAB: Layout primitives
+    // -----------------------
+    tabs.addTab("layout", "Layout", () => {
+      const root = new UI.VDiv({ gap: 12 });
+
+      new UI.Heading("Layout primitives", { level: 3 }).appendTo(root);
+      new UI.Text("HDiv / VDiv / HSpacer / Card / Text / Pre.", { muted: true }).appendTo(root);
+
+      const row = new UI.HDiv({ gap: 12, wrap: true, align: "stretch" }).appendTo(root);
+
+      const a = new UI.Card({ title: "Card A" }).appendTo(row).setStyle({ flex: "1 1 260px" });
+      a.add(new UI.Text("This card grows and wraps.", { muted: true }));
+
+      const b = new UI.Card({ title: "Card B (wider)" }).appendTo(row).setStyle({ flex: "2 1 360px" });
+      b.add(new UI.Text("B is wider (flex 2).", { muted: true }));
+      b.add(new UI.Pre("No manual <pre> needed.\nEverything is a BaseElement wrapper.\n"));
+
+      const row2 = new UI.HDiv({ gap: 8, wrap: true, align: "center" }).appendTo(root);
+      new UI.Text("Left").appendTo(row2);
+      new UI.HSpacer().appendTo(row2);
+      new UI.Text("Right (pushed by HSpacer)").appendTo(row2);
+
+      return root;
+    });
+
+    // -----------------------
+    // TAB: Lifecycle / Destroy demo
+    // -----------------------
+    tabs.addTab("lifecycle", "Lifecycle", () => {
+      const root = new UI.VDiv({ gap: 12 });
+
+      new UI.Heading("Lifecycle / destroy() demo", { level: 3 }).appendTo(root);
+      new UI.Text(
+        "Hier wird ein Sub-Tree erstellt und wieder zerstört. Praktisch, um Cleanup (Listener/Intervals) zu testen.",
+        { muted: true }
+      ).appendTo(root);
+
+      const host = new UI.Card({ title: "Mount area" }).appendTo(root);
+      const actions = new UI.HDiv({ gap: 8, wrap: true }).appendTo(root);
+
+      let mounted = null;
+      let t = null;
+
+      function mount() {
+        if (mounted) return;
+        mounted = new UI.VDiv({ gap: 8 });
+
+        const txt = new UI.Text("Mounted view: increments local counter each 500ms", { muted: true });
+        mounted.add(txt);
+
+        const out = new UI.Text("local=0", { className: "mono" });
+        mounted.add(out);
+
+        let local = 0;
+        t = setInterval(() => {
+          local++;
+          out.setText(`local=${local}`);
+        }, 500);
+
+        // Ensure timer cleaned up on destroy
+        mounted.own(() => {
+          if (t) clearInterval(t);
+          t = null;
+        });
+
+        host.add(mounted);
+      }
+
+      function unmount() {
+        if (!mounted) return;
+        mounted.destroy({ remove: true });
+        mounted = null;
+      }
+
+      new UI.Button("Mount").appendTo(actions).onClick(() => mount());
+      new UI.Button("Unmount", { variant: "secondary" }).appendTo(actions).onClick(() => unmount());
+
+      // Auto mount on open
+      mount();
+
+      // Ensure cleanup if tab content is destroyed by future changes
+      root.own(() => unmount());
+
+      return root;
+    });
+
+    // Default tab
+    tabs.setActive("controls");
+  </script>
 </body>
 </html>
