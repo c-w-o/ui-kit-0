@@ -82,6 +82,11 @@ def main():
         built_dist = build_root / "dist"
         for fn in (out_dev, out_min):
             shutil.copy2(built_dist / fn, dist_dir / fn)
+    
+    # sbom.json mit nach dist kopieren (wenn vorhanden)
+    sbom_src = build_root / "src" / "sbom.json"
+    if sbom_src.is_file():
+        shutil.copy2(sbom_src, dist_dir / "sbom.json")
 
     print("\nDone:")
     print(f" - dist/{out_dev}")
