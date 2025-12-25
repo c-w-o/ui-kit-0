@@ -33,23 +33,23 @@ export class Tabs extends BaseElement {
     // Dropdown (responsive fallback)
     this.dropdown = document.createElement("select");
     this.dropdown.className = "ui-tabselect";
-    this.dropdown.addEventListener("change", () => {
-      this.setActive(this.dropdown.value);
-    });
+    
+    // Register dropdown handler with cleanup
+    const onDropChange = () => this.setActive(this.dropdown.value);
+    this.dropdown.addEventListener("change", onDropChange);
+    this.own(() => this.dropdown.removeEventListener("change", onDropChange));
+    
+    // IMPORTANT: make sub-widgets "owned children" so their destroy() runs
+    // (SelectionGroup has listeners; panels may have future resources)
+    this.add(this.group);                 // instead of appendChild(this.group.el)
+    this.el.appendChild(this.dropdown);   // dropdown is a raw element, so keep it as-is
+    this.add(this.panels);                // instead of appendChild(this.panels.el)
 
-    // Panels container
-    this.panels = new VDiv({ gap: 12, className: "ui-tabpanels" });
-
-    this.el.appendChild(this.group.el);
-    this.el.appendChild(this.dropdown);
-    this.el.appendChild(this.panels.el);
-
-    // Responsive handling
-    this._ro = new ResizeObserver(() => this._updateResponsiveMode());
-    this._ro.observe(this.group.bar.el);
-    this._updateResponsiveMode();
   }
-
+  
+  destroy(opts = { remove: true }) {
+    super.destroy(opts);
+  }
   onChange(fn) {
     this.onChangeCb = fn;
     return this;

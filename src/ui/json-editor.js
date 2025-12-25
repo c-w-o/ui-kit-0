@@ -18,7 +18,9 @@ export class JsonTextEditor extends BaseElement {
     this.el.append(this.text, this.msg);
     this.setValue(initialValue);
 
-    this.text.addEventListener("input", () => this._update());
+    const handler = () => this._update();
+    this.text.addEventListener("input", handler);
+    this.own(() => this.text.removeEventListener("input", handler));
   }
 
   setValue(obj) {

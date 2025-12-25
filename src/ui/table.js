@@ -40,15 +40,9 @@ export class TableView extends BaseElement {
   }
     
   bind(store, path) {
-    // init
     this.setData(store.getPath(path) || []);
-  
-    // Store -> Table
-    const unsub = store.subscribePath(path, (val) => {
-      this.setData(val || []);
-    });
-  
-    return unsub;
+    this.own(store.subscribePath(path, (val) => this.setData(val || [])));
+    return this;
   }
 
   onRowClick(fn) {

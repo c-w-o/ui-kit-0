@@ -25,8 +25,7 @@ export class SelectionGroup extends BaseElement {
     this.bar = new HDiv({ gap: 8, wrap, className: "ui-selection-bar" });
     this.el.appendChild(this.bar.el);
 
-    // Enable roving focus
-    this.bar.el.addEventListener("keydown", (e) => this._onKeyDown(e));
+    this.bar.on("keydown", (e) => this._onKeyDown(e));
   }
 
   onChange(fn) {

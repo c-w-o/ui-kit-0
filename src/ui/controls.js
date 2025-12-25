@@ -54,12 +54,9 @@ export class TextField extends BaseElement {
     this.on("input", () => store.setPath(path, this.getValue()));
   
     // Store -> UI
-    const unsub = store.subscribePath(path, (val) => {
-      const next = val ?? "";
-      if (this.el.value !== next) this.el.value = next;
-    });
-  
-    return unsub;
+    this.own(store.subscribePath(path, (val) => this.setValue(val)));
+
+    return this;
   }
 }
 
@@ -84,9 +81,10 @@ export class Checkbox extends BaseElement {
       this.input = this.el;
     }
   }
-  
+  // Checkbox.on(): register cleanup via own()
   on(event, fn) {
     this.input.addEventListener(event, fn);
+    this.own(() => this.input.removeEventListener(event, fn));
     return this;
   }
   
@@ -102,13 +100,9 @@ export class Checkbox extends BaseElement {
     // UI -> Store
     this.on("change", () => store.setPath(path, this.getValue()));
   
-    // Store -> UI
-    const unsub = store.subscribePath(path, (val) => {
-      const next = !!val;
-      if (this.input.checked !== next) this.input.checked = next;
-    });
-  
-    return unsub;
+    this.own(store.subscribePath(path, (val) => this.setValue(val)));
+
+    return this;
   }
 }
 
@@ -172,12 +166,9 @@ export class Select extends BaseElement {
     this.on("change", () => store.setPath(path, this.getTypedValue()));
 
     // Store -> UI
-    const unsub = store.subscribePath(path, (val) => {
-      const next = this._format(val);
-      if (this.el.value !== next) this.el.value = next;
-    });
+    this.own(store.subscribePath(path, (val) => this.setValue(val)));
 
-    return unsub;
+    return this;
   }
 }
 
