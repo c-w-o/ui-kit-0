@@ -76,46 +76,95 @@ export class TextField extends BaseElement {
 }
 
 export class Checkbox extends BaseElement {
-  constructor(value = false, { slider = false } = {}) {
-    super(slider ? "label" : "input");
+  /**
+   * A styled checkbox wrapper. Without CSS it is still usable and aligned.
+   *
+   * Options:
+   * - label: text shown next to checkbox/slider
+   * - slider: render as switch slider (CSS-enhanced)
+   * - checked: initial state (or pass as first arg like before)
+   */
+  constructor(checked = false, { label = "", slider = false } = {}) {
+    // We render a wrapper <label> so the whole row is clickable.
+    super("label");
+    this.el.classList.add("ui-check");
 
+    // Minimal fallback styling (CSS can override)
+    this.setStyle({
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+      cursor: "pointer",
+      userSelect: "none",
+    });
+
+    // Real checkbox input
+    this.input = document.createElement("input");
+    this.input.type = "checkbox";
+    this.input.checked = !!checked;
+
+    // Optional slider track (CSS-enhanced)
+    this.sliderEl = null;
+    this.switchBox = null;
+    
     if (slider) {
-      this.el.className = "ui-switch";
-
-      this.input = document.createElement("input");
-      this.input.type = "checkbox";
-      this.input.checked = !!value;
-
-      this.slider = document.createElement("span");
-      this.slider.className = "ui-slider";
-
-      this.el.append(this.input, this.slider);
+      // IMPORTANT:
+      // .ui-switch in ui-kit-0.css is a fixed-size switch box (44x24).
+      // Therefore it must NOT be on the outer <label>. Put it on an inner element.
+      this.switchBox = document.createElement("span");
+      this.switchBox.className = "ui-switch";
+    
+      this.sliderEl = document.createElement("span");
+      this.sliderEl.className = "ui-slider";
+    
+      // switchBox contains only input + slider visuals
+      this.switchBox.append(this.input, this.sliderEl);
+    
+      // outer label contains switchBox + text
+      this.el.append(this.switchBox, this.textEl);
     } else {
-      this.el.type = "checkbox";
-      this.el.checked = !!value;
-      this.input = this.el;
+      // Classic checkbox: input + text
+      this.el.append(this.input, this.textEl);
     }
   }
-  // Checkbox.on(): register cleanup via own()
-  on(event, fn) {
-    this.input.addEventListener(event, fn);
-    this.own(() => this.input.removeEventListener(event, fn));
+
+  setLabel(text) {
+    this.textEl.textContent = text ?? "";
     return this;
   }
-  
-  getValue() { return !!this.input.checked; }
-  
-  setValue(v) { this.input.checked = !!v; return this; }
-  
-  // in Checkbox class:
+
+  getValue() {
+    return !!this.input.checked;
+  }
+
+  setValue(v) {
+    this.input.checked = !!v;
+    return this;
+  }
+
+  /**
+   * Override event binding to attach to the real input for change/input events.
+   * All listeners are owned and removed on destroy().
+   */
+  on(event, handler, options) {
+    const target = this.input;
+    target.addEventListener(event, handler, options);
+    this.own(() => target.removeEventListener(event, handler, options));
+    return this;
+  }
+
   bind(store, path) {
     // init
-    this.input.checked = !!store.getPath(path);
-  
+    this.setValue(store.getPath(path) ?? false);
+
     // UI -> Store
     this.on("change", () => store.setPath(path, this.getValue()));
-  
-    this.own(store.subscribePath(path, (val) => this.setValue(val)));
+
+    // Store -> UI
+    this.own(store.subscribePath(path, (val) => {
+      const next = !!val;
+      if (this.getValue() !== next) this.setValue(next);
+    }));
 
     return this;
   }
