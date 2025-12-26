@@ -2,31 +2,28 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "ui-kit-0-sbom",
-  "documentNamespace": "urn:uuid:REPLACE-WITH-A-UUID",
+  "name": "ui-kit-0",
+  "documentNamespace": "urn:uuid:REPLACE-ME",
   "creationInfo": {
     "created": "2025-12-25T00:00:00Z",
     "creators": [
-      "Tool: ui-kit-0 sbom seed (manual)",
-      "Organization: UNKNOWN",
-      "Person: UNKNOWN"
+      "Person: c-w-o"
     ],
     "licenseListVersion": "3.23"
   },
   "documentDescribes": [
-    "SPDXRef-Package-Project"
+    "SPDXRef-Package-UI-KIT"
   ],
   "packages": [
     {
-      "SPDXID": "SPDXRef-Package-Project",
+      "SPDXID": "SPDXRef-Package-UI-KIT",
       "name": "ui-kit-0",
       "versionInfo": "0.1.0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseDeclared": "MIT",
       "licenseConcluded": "MIT",
-      "copyrightText": "NOASSERTION",
-      "supplier": "Person: c-w-o"
+      "copyrightText": "NOASSERTION"
     },
     {
       "SPDXID": "SPDXRef-Package-ChartJS",
@@ -37,34 +34,23 @@
       "filesAnalyzed": true,
       "licenseDeclared": "MIT",
       "licenseConcluded": "MIT",
-      "copyrightText": "NOASSERTION",
-      "supplier": "NOASSERTION",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
           "referenceLocator": "pkg:npm/chart.js@4.5.1"
         }
-      ],
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "ecc3cd1eeb8c34d2178e3f59fd63ec5a3d84358c11730af0b9958dc886d7652a"
-        }
-      ],
-      "sourceInfo": "UMD bundles copied from Chart.js v4.5.1 GitHub release assets; file hashes recorded."
+      ]
     },
     {
       "SPDXID": "SPDXRef-Package-Ajv",
       "name": "ajv",
       "versionInfo": "8.17.1",
       "downloadLocation": "NOASSERTION",
-      "homepage": "https://www.npmjs.com/package/ajv",
+      "homepage": "https://ajv.js.org/",
       "filesAnalyzed": true,
       "licenseDeclared": "MIT",
       "licenseConcluded": "MIT",
-      "copyrightText": "NOASSERTION",
-      "supplier": "NOASSERTION",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
@@ -72,124 +58,145 @@
           "referenceLocator": "pkg:npm/ajv@8.17.1"
         }
       ],
-      "checksums": [
+      "sourceInfo": "ajv7.bundle.min.js (draft-07); origin: https://cdnjs.cloudflare.com/ajax/libs/ajv/8.17.1/ajv7.bundle.min.js"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-JsonEditor",
+      "name": "json-editor",
+      "versionInfo": "2.15.2",
+      "downloadLocation": "NOASSERTION",
+      "homepage": "https://github.com/json-editor/json-editor",
+      "filesAnalyzed": true,
+      "licenseDeclared": "MIT",
+      "licenseConcluded": "MIT",
+      "externalRefs": [
         {
-          "algorithm": "SHA256",
-          "checksumValue": "d2f97a24636c44135e1ffffeea29656c06a1c1f71b315e958c88d0e8126c2100"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40json-editor%2Fjson-editor@2.15.2"
         }
       ],
-      "sourceInfo": "Ajv dist/2020.js fetched as third_party/ajv2020.js; origin URL: https://cdn.jsdelivr.net/npm/ajv@8.17.1/dist/2020.js"
+      "sourceInfo": "origin: https://unpkg.com/@json-editor/json-editor@2.15.2/dist/jsoneditor.js"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Ace",
+      "name": "ace-builds",
+      "versionInfo": "1.43.5",
+      "downloadLocation": "NOASSERTION",
+      "homepage": "https://github.com/ajaxorg/ace-builds",
+      "filesAnalyzed": true,
+      "licenseDeclared": "BSD-3-Clause",
+      "licenseConcluded": "BSD-3-Clause",
+      "sourceInfo": "src-min-noconflict: ace.js, mode-json.js, worker-json.js"
     }
   ],
   "files": [
     {
-      "SPDXID": "SPDXRef-File-chart-umd",
-      "fileName": "third_party/chart.umd.js",
+      "SPDXID": "SPDXRef-File-ajv7",
+      "fileName": "third_party/ajv/ajv7.bundle.min.js",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "ecc3cd1eeb8c34d2178e3f59fd63ec5a3d84358c11730af0b9958dc886d7652a"
+          "checksumValue": "e0f02be09e139e77151a75480afae5e15001cff3ab1ee96c22b9d6904eaab726"
         }
       ],
-      "licenseConcluded": "MIT",
-      "licenseInfoInFiles": ["NOASSERTION"],
-      "copyrightText": "NOASSERTION"
+      "licenseConcluded": "MIT"
     },
     {
-      "SPDXID": "SPDXRef-File-chart-umd-map",
-      "fileName": "third_party/chart.umd.js.map",
+      "SPDXID": "SPDXRef-File-jsoneditor",
+      "fileName": "third_party/json-editor/jsoneditor.min.js",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "50f788499bc584696c2344c77e91af0f80a518eca93e312ddbb8008d7525d7fa"
+          "checksumValue": "a468c9cab58a59d5110b32f21cf484e945a07d42a2d0f7985769aaf14d091d00"
         }
       ],
-      "licenseConcluded": "NOASSERTION",
-      "licenseInfoInFiles": ["NOASSERTION"],
-      "copyrightText": "NOASSERTION"
+      "licenseConcluded": "MIT"
     },
     {
-      "SPDXID": "SPDXRef-File-chart-umd-min",
-      "fileName": "third_party/chart.umd.min.js",
+      "SPDXID": "SPDXRef-File-ace-core",
+      "fileName": "third_party/ace/ace.js",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a"
+          "checksumValue": "28fe7d2af301ef6f529464e2dcfc5fbbde47accbc4da63e801127d624ac6b336"
         }
       ],
-      "licenseConcluded": "MIT",
-      "licenseInfoInFiles": ["NOASSERTION"],
-      "copyrightText": "NOASSERTION"
+      "licenseConcluded": "BSD-3-Clause"
     },
     {
-      "SPDXID": "SPDXRef-File-chart-umd-min-map",
-      "fileName": "third_party/chart.umd.min.js.map",
+      "SPDXID": "SPDXRef-File-ace-mode-json",
+      "fileName": "third_party/ace/mode-json.js",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "8c328df49d295935c81d64d3b36d6ac1c20c385f1ba5b4df3ec12a26b3d64d9b"
+          "checksumValue": "010feab73fd75cfcdee30cdc71bdcc868e4f914465a59a7141c5ee4983a8afec"
         }
       ],
-      "licenseConcluded": "NOASSERTION",
-      "licenseInfoInFiles": ["NOASSERTION"],
-      "copyrightText": "NOASSERTION"
+      "licenseConcluded": "BSD-3-Clause"
     },
     {
-      "SPDXID": "SPDXRef-File-ajv2020",
-      "fileName": "third_party/ajv2020.js",
+      "SPDXID": "SPDXRef-File-ace-worker-json",
+      "fileName": "third_party/ace/worker-json.js",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "d2f97a24636c44135e1ffffeea29656c06a1c1f71b315e958c88d0e8126c2100"
+          "checksumValue": "15a9597d26ce8252d020e518529ac5a844eb963a28aac1b03394decbbbe16f1b"
         }
       ],
-      "licenseConcluded": "MIT",
-      "licenseInfoInFiles": ["NOASSERTION"],
-      "copyrightText": "NOASSERTION"
+      "licenseConcluded": "BSD-3-Clause"
     }
   ],
   "relationships": [
     {
       "spdxElementId": "SPDXRef-DOCUMENT",
       "relationshipType": "DESCRIBES",
-      "relatedSpdxElement": "SPDXRef-Package-Project"
+      "relatedSpdxElement": "SPDXRef-Package-UI-KIT"
     },
     {
-      "spdxElementId": "SPDXRef-Package-Project",
+      "spdxElementId": "SPDXRef-Package-UI-KIT",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-Package-ChartJS"
     },
     {
-      "spdxElementId": "SPDXRef-Package-Project",
+      "spdxElementId": "SPDXRef-Package-UI-KIT",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-Package-Ajv"
     },
-
     {
-      "spdxElementId": "SPDXRef-Package-ChartJS",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-chart-umd"
+      "spdxElementId": "SPDXRef-Package-UI-KIT",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-JsonEditor"
     },
     {
-      "spdxElementId": "SPDXRef-Package-ChartJS",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-chart-umd-map"
+      "spdxElementId": "SPDXRef-Package-UI-KIT",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-Ace"
     },
-    {
-      "spdxElementId": "SPDXRef-Package-ChartJS",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-chart-umd-min"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-ChartJS",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-chart-umd-min-map"
-    },
-
     {
       "spdxElementId": "SPDXRef-Package-Ajv",
       "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-ajv2020"
+      "relatedSpdxElement": "SPDXRef-File-ajv7"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-JsonEditor",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-jsoneditor"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Ace",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-ace-core"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Ace",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-ace-mode-json"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Ace",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-ace-worker-json"
     }
   ]
 }
