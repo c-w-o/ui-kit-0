@@ -53,8 +53,6 @@ export class SchemaConfigEditor extends BaseElement {
 
     new Text(title, { muted: true }).appendTo(root);
 
-    this.tabs = new Tabs({ active: "user" }).appendTo(root);
-
     const d = deps();
 
     // Tabs always exist

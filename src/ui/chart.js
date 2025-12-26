@@ -219,7 +219,7 @@ export class LineChartCard extends ChartCard {
       },
       ...options,
     };
-
+    
     super({
       title,
       chart: {
@@ -233,6 +233,11 @@ export class LineChartCard extends ChartCard {
     this.maxPoints = maxPoints;
     this.labelFromTs = labelFromTs;
     this._sampleIndex = 0;
+    
+    if (!window.Chart) {
+      this.add(new Text("Chart.js not loaded", { muted: true }));
+      return;
+    }
   }
 
   setData(data) {
