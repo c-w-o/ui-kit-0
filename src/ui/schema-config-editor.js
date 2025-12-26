@@ -3,7 +3,13 @@ import { Tabs } from "./tabs.js";
 import { Card, HDiv, VDiv } from "./layout.js";
 import { Button, Text } from "./controls.js";
 import { makeValidator } from "./validation.js";
-
+function deps() {
+  return {
+    ajv: !!(window.ajv7 || window.Ajv),
+    ace: !!window.ace,
+    jsonEditor: !!window.JSONEditor,
+  };
+}
 /**
  * SchemaConfigEditor
  * - User: json-editor (visual, supports oneOf/anyOf)
@@ -49,12 +55,20 @@ export class SchemaConfigEditor extends BaseElement {
 
     this.tabs = new Tabs({ active: "user" }).appendTo(root);
 
-    // User tab (json-editor)
-    this.tabs.addTab("user", "User UI", () => this._buildUserTab({ debounceMs: userWritebackDebounceMs }));
+    const d = deps();
 
-    // Expert tab (Ace value + schema + apply)
-    this.tabs.addTab("expert", "Expert", () => this._buildExpertTab());
+    // Tabs always exist
+    this.tabs = new Tabs({ active: d.jsonEditor ? "user" : "expert" }).appendTo(root);
+    
+    // User tab: only if JSONEditor is present
+    if (d.jsonEditor) {
+      this.tabs.addTab("user", "User UI", () => this._buildUserTab({ debounceMs: userWritebackDebounceMs }));
+    } else {
+      this.tabs.addTab("user", "User UI", () => this._buildMissingUserTab());
+    }
 
+// Expert tab: prefer Ace, fallback to textarea if Ace missing
+this.tabs.addTab("expert", "Expert", () => (d.ace ? this._buildExpertTab() : this._buildExpertFallbackTab()));
     // Keep editors in sync with store
     this.own(store.subscribePath(this.valuePath, () => this._onStoreValueChanged()));
     if (this.schemaPath) this.own(store.subscribePath(this.schemaPath, () => this._onStoreSchemaChanged()));
@@ -63,7 +77,80 @@ export class SchemaConfigEditor extends BaseElement {
     this._onStoreSchemaChanged();
     this._onStoreValueChanged();
   }
-
+  
+  _buildMissingUserTab() {
+    const root = new VDiv({ gap: 12 });
+    root.add(new Text("json-editor is not loaded (window.JSONEditor missing).", { muted: true }));
+    root.add(new Text("Fallback: use Expert tab (raw JSON).", { muted: true }));
+    return root;
+  }
+  
+  _buildExpertFallbackTab() {
+    const root = new VDiv({ gap: 12 });
+  
+    root.add(new Text("Ace is not loaded (window.ace missing).", { muted: true }));
+    root.add(new Text("Fallback: plain textarea editing (no syntax highlight).", { muted: true }));
+  
+    const cardVal = new Card({ title: "Value JSON (fallback)" }).appendTo(root);
+    const taVal = document.createElement("textarea");
+    taVal.style.width = "100%";
+    taVal.style.height = "320px";
+    cardVal.el.appendChild(taVal);
+  
+    const cardSchema = new Card({ title: this.schemaPath ? "Schema JSON (fallback)" : "Schema JSON (read-only fallback)" }).appendTo(root);
+    const taSchema = document.createElement("textarea");
+    taSchema.style.width = "100%";
+    taSchema.style.height = "320px";
+    taSchema.readOnly = !this.schemaPath;
+    cardSchema.el.appendChild(taSchema);
+  
+    const actions = new HDiv({ gap: 8, wrap: true }).appendTo(root);
+    new Button("Format value", { variant: "secondary" }).appendTo(actions).onClick(() => formatTextareaJson(taVal));
+    new Button("Apply value").appendTo(actions).onClick(() => {
+      const parsed = safeParse(taVal.value);
+      if (!parsed.ok) return alert(`Value parse error: ${parsed.error}`);
+      const res = this._validate(parsed.obj);
+      if (!res.ok) return alert(`Value invalid (${res.errors.length} errors)`);
+      this._setValueToStore(parsed.obj);
+    });
+  
+    if (this.schemaPath) {
+      new Button("Format schema", { variant: "secondary" }).appendTo(actions).onClick(() => formatTextareaJson(taSchema));
+      new Button("Apply schema").appendTo(actions).onClick(() => {
+        const parsed = safeParse(taSchema.value);
+        if (!parsed.ok) return alert(`Schema parse error: ${parsed.error}`);
+        // try compile
+        try {
+          this.schema = parsed.obj;
+          this._compileValidator();
+        } catch (e) {
+          return alert(`Schema compile error: ${String(e?.message || e)}`);
+        }
+        this._setSchemaToStore(parsed.obj);
+      });
+    }
+  
+    // sync initial
+    taVal.value = JSON.stringify(this._getValueFromStore() ?? {}, null, 2);
+    taSchema.value = JSON.stringify(this._getSchemaFromStore() ?? {}, null, 2);
+  
+    // sync store → textareas (avoid cursor jumps: only update if equal after trim optional)
+    root.own(this.store.subscribePath(this.valuePath, () => {
+      const canon = JSON.stringify(this._getValueFromStore() ?? {}, null, 2);
+      if (taVal.value.trim() === canon.trim()) return;
+      taVal.value = canon;
+    }));
+    if (this.schemaPath) {
+      root.own(this.store.subscribePath(this.schemaPath, () => {
+        const canon = JSON.stringify(this._getSchemaFromStore() ?? {}, null, 2);
+        if (taSchema.value.trim() === canon.trim()) return;
+        taSchema.value = canon;
+      }));
+    }
+  
+    return root;
+  }
+  
   // ---------- schema/validator ----------
   _compileValidator() {
     this.validator = makeValidator(this.schema);
@@ -488,3 +575,14 @@ class AceJsonAdapter {
     this.editor = null;
   }
 }
+
+function safeParse(text) {
+  try { return { ok: true, obj: JSON.parse(text) }; }
+  catch (e) { return { ok: false, error: String(e?.message || e) }; }
+}
+function formatTextareaJson(ta) {
+  const p = safeParse(ta.value);
+  if (!p.ok) return;
+  ta.value = JSON.stringify(p.obj, null, 2);
+}
+
