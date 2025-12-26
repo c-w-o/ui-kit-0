@@ -103,6 +103,10 @@ export class Checkbox extends BaseElement {
     this.input.type = "checkbox";
     this.input.checked = !!checked;
 
+    this.textEl = document.createElement("span");
+    this.textEl.classList.add("ui-checkbox-text");
+    this.textEl.textContent = label;
+
     // Optional slider track (CSS-enhanced)
     this.sliderEl = null;
     this.switchBox = null;
@@ -119,7 +123,7 @@ export class Checkbox extends BaseElement {
     
       // switchBox contains only input + slider visuals
       this.switchBox.append(this.input, this.sliderEl);
-    
+      
       // outer label contains switchBox + text
       this.el.append(this.switchBox, this.textEl);
     } else {
