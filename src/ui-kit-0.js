@@ -126,6 +126,26 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  *
  * See src/sbom.json for exact versions and checksums.
  */
+ 
+ import { FALLBACK_CSS } from "./ui/fallback-css.js";
+
+function ensureUiCss() {
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue("--ui-css-loaded")
+    .trim();
+
+  if (v === "1") return;
+
+  const style = document.createElement("style");
+  style.setAttribute("data-ui-fallback", "true");
+  style.textContent = FALLBACK_CSS;
+  document.head.appendChild(style);
+
+  console.warn("[ui-kit] CSS not loaded → fallback CSS applied");
+}
+
+ensureUiCss();
+ 
 export * from "./ui/base.js";
 export * from "./ui/layout.js";
 export * from "./ui/controls.js";
