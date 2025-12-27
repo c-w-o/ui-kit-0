@@ -1,8 +1,8 @@
 
 export const UI_KIT_NAME = "ui-kit";
 export const UI_KIT_MAJOR = 0;
-export const UI_KIT_MINOR = 4;
-export const UI_KIT_PATCH = 1;
+export const UI_KIT_MINOR = 5;
+export const UI_KIT_PATCH = 0;
 
 export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
 /**
