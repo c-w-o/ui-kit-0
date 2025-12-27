@@ -190,6 +190,7 @@ this.tabs.addTab("expert", "Expert", () => (d.ace ? this._buildExpertTab() : thi
 
     // mount point for json-editor
     this.userMount = document.createElement("div");
+    this.userMount.classList.add("json-editor");
     this.userMount.style.minHeight = "80px";
     card.el.appendChild(this.userMount);
 
