@@ -91,14 +91,12 @@ this.tabs.addTab("expert", "Expert", () => (d.ace ? this._buildExpertTab() : thi
   
     const cardVal = new Card({ title: "Value JSON (fallback)" }).appendTo(root);
     const taVal = document.createElement("textarea");
-    taVal.style.width = "100%";
-    taVal.style.height = "320px";
+    taVal.className = "ui-textarea expert";
     cardVal.el.appendChild(taVal);
   
     const cardSchema = new Card({ title: this.schemaPath ? "Schema JSON (fallback)" : "Schema JSON (read-only fallback)" }).appendTo(root);
     const taSchema = document.createElement("textarea");
-    taSchema.style.width = "100%";
-    taSchema.style.height = "320px";
+    taSchema.className = "ui-textarea expert";
     taSchema.readOnly = !this.schemaPath;
     cardSchema.el.appendChild(taSchema);
   
@@ -240,11 +238,11 @@ this.tabs.addTab("expert", "Expert", () => (d.ace ? this._buildExpertTab() : thi
 
     // Ace mounts
     const valueMount = document.createElement("div");
-    valueMount.style.height = "420px";
+    valueMount.className = "ui-textarea expert";
     valueCard.el.appendChild(valueMount);
 
     const schemaMount = document.createElement("div");
-    schemaMount.style.height = "420px";
+    schemaMount.className = "ui-textarea expert";
     schemaCard.el.appendChild(schemaMount);
 
     this.aceValue = new AceJsonAdapter({ mount: valueMount, readOnly: false });

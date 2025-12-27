@@ -7,16 +7,7 @@ export class Button extends BaseElement {
     this.el.type = "button";
     this.el.classList.add("ui-btn");
     this.setVariant(variant);
-    this.setStyle({
-      padding: "6px 10px",
-      border: "1px solid #888",
-      borderRadius: "4px",
-      background: "#eee",
-      cursor: "pointer"
-    });
   }
-  
-  
 
   setVariant(variant) {
     this.el.classList.remove("primary", "secondary", "danger");
@@ -41,12 +32,6 @@ export class TextField extends BaseElement {
     this.el.value = value ?? "";
     this.el.placeholder = placeholder;
     this.el.classList.add("ui-input");
-    this.setStyle({
-      padding: "6px",
-      border: "1px solid #888",
-      borderRadius: "4px",
-      width: "100%"
-    });
   }
 
   getValue() { return this.el.value; }
@@ -92,10 +77,6 @@ export class Checkbox extends BaseElement {
     // Minimal fallback styling (CSS can override)
     this.setStyle({
       display: "inline-flex",
-      alignItems: "center",
-      gap: "8px",
-      cursor: "pointer",
-      userSelect: "none",
     });
 
     // Real checkbox input

@@ -4,11 +4,6 @@ export class BaseElement {
     this._cleanup = [];
     this._children = [];
     this._destroyed = false;
-    
-    // ---- CSS fallback defaults (very minimal) ----
-    this.el.style.boxSizing = "border-box";
-    this.el.style.fontFamily = "system-ui, sans-serif";
-    this.el.style.fontSize = "14px";
   }
 
   appendTo(parent) {

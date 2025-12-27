@@ -1,10 +1,14 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" data-ui-theme="light" data-ui-density="comfortable">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>UI Kit 0 – Max Feature Demo</title>
 
+  <!-- Theme / Design API (tokens + theme/density switching) -->
+  <link rel="stylesheet" href="./src/ui-kit-0.theme.css" />
+
+  <!-- Component styles (consumes tokens) -->
   <link rel="stylesheet" href="./src/ui-kit-0.css" />
 
   <style>
@@ -37,9 +41,51 @@
 
 <body>
   <div id="app"></div>
+<script>
+  // Visible error overlay (no console needed)
+  window.addEventListener("error", (e) => {
+    const pre = document.createElement("pre");
+    pre.style.whiteSpace = "pre-wrap";
+    pre.style.padding = "12px";
+    pre.style.margin = "12px";
+    pre.style.border = "2px solid #b00020";
+    pre.style.background = "#fdecea";
+    pre.textContent =
+      "JS ERROR:\n" +
+      (e?.message || e) + "\n\n" +
+      (e?.filename ? `${e.filename}:${e.lineno}:${e.colno}\n\n` : "") +
+      (e?.error?.stack || "");
+    document.body.prepend(pre);
+  });
 
+  window.addEventListener("unhandledrejection", (e) => {
+    const pre = document.createElement("pre");
+    pre.style.whiteSpace = "pre-wrap";
+    pre.style.padding = "12px";
+    pre.style.margin = "12px";
+    pre.style.border = "2px solid #b00020";
+    pre.style.background = "#fdecea";
+    pre.textContent =
+      "PROMISE REJECTION:\n" +
+      (e?.reason?.message || String(e?.reason || e)) + "\n\n" +
+      (e?.reason?.stack || "");
+    document.body.prepend(pre);
+  });
+</script>
   <script type="module">
     import * as UI from "./src/ui-kit-0.js";
+
+    // -----------------------
+    // Theme/Density helpers (demo only)
+    // -----------------------
+    function setTheme(theme) {
+      // "light" | "dark" | "auto"
+      document.documentElement.dataset.uiTheme = theme;
+    }
+    function setDensity(density) {
+      // "comfortable" | "compact"
+      document.documentElement.dataset.uiDensity = density;
+    }
 
     // -----------------------
     // Quick runtime checks
@@ -56,7 +102,6 @@
     // -----------------------
     const draft07 = "http://json-schema.org/draft-07/schema#";
 
-    // Realistic-ish config schema w/ oneOf + anyOf + nested
     const schemaV1 = {
       $schema: draft07,
       title: "Service Config (Demo)",
@@ -65,8 +110,6 @@
       required: ["kind", "backend", "observability"],
       properties: {
         kind: { type: "string", const: "service-config" },
-
-        // --- oneOf (variant selector)
         backend: {
           title: "Backend",
           oneOf: [
@@ -79,10 +122,7 @@
                 type: { const: "http" },
                 url: { type: "string", minLength: 1 },
                 timeoutMs: { type: "integer", minimum: 50, maximum: 60000 },
-                headers: {
-                  type: "object",
-                  additionalProperties: { type: "string" }
-                }
+                headers: { type: "object", additionalProperties: { type: "string" } }
               }
             },
             {
@@ -97,8 +137,6 @@
             }
           ]
         },
-
-        // --- anyOf (real-ish: allow one or more constraints to apply)
         cache: {
           title: "Cache",
           type: "object",
@@ -107,7 +145,6 @@
             enabled: { type: "boolean", default: false },
             maxItems: { type: "integer", minimum: 0, default: 500 },
             policy: { type: "string", enum: ["lru", "fifo", "none"], default: "lru" },
-            // anyOf: either TTL-based OR size-based OR both
             constraints: {
               title: "Constraints (anyOf)",
               type: "object",
@@ -123,7 +160,6 @@
             }
           }
         },
-
         features: {
           title: "Features",
           type: "object",
@@ -134,7 +170,6 @@
             mode: { type: "string", enum: ["dev", "prod", "test"], default: "dev" }
           }
         },
-
         observability: {
           title: "Observability",
           type: "object",
@@ -153,8 +188,6 @@
             }
           }
         },
-
-        // arrays: basic list editing
         allowList: {
           title: "Allow List",
           type: "array",
@@ -164,7 +197,6 @@
       }
     };
 
-    // Slightly different schema for "schema apply" demo
     const schemaV2 = JSON.parse(JSON.stringify(schemaV1));
     schemaV2.title = "Service Config (Demo, v2)";
     schemaV2.properties.features.properties.mode.enum = ["dev", "prod", "staging", "test"];
@@ -179,7 +211,11 @@
       role: "dev",
       age: 31,
       agree: true,
-      config: { zebra: true, themeDense: false },
+      config: {
+        zebra: true,
+        themeDense: false, // kept for demo UI toggle; maps to density below
+        theme: "light",    // "light" | "dark" | "auto"
+      },
 
       people: [
         { id: 1, name: "Alice", age: 31, active: true },
@@ -189,10 +225,9 @@
 
       metrics: {
         countsByRole: { dev: 0, ops: 0, pm: 0, qa: 0 },
-        samples: [] // for optional bundle-based chart load
+        samples: []
       },
 
-      // SchemaConfigEditor uses these:
       jsonSchema: schemaV1,
       jsonConfig: {
         kind: "service-config",
@@ -261,7 +296,7 @@
     // -----------------------
     // Main surface + Tabs
     // -----------------------
-    const surface = new UI.Card({ title: "" }).appendTo(app).setStyle({ padding: "14px" });
+    const surface = new UI.Card({ title: "" }).appendTo(app);
     const tabs = new UI.Tabs({ active: "controls" }).appendTo(surface);
 
     // -----------------------
@@ -286,7 +321,40 @@
       new UI.Button("Reset clicks", { variant: "secondary" }).appendTo(btnRow).onClick(() => store.setPath("clicks", 0));
       new UI.Button("Danger (alert)", { variant: "danger" }).appendTo(btnRow).onClick(() => alert("Danger button demo"));
 
-      // Form grid
+      // Theme/Density toggles (new contracts)
+      const uiRow = new UI.HDiv({ gap: 8, wrap: true, align: "center" }).appendTo(left).setStyle({ marginTop: "10px" });
+
+      new UI.Text("Theme", { muted: true }).appendTo(uiRow);
+      new UI.Select({
+        options: [
+          { value: "light", label: "Light" },
+          { value: "dark",  label: "Dark" },
+          { value: "auto",  label: "Auto (system)" },
+        ],
+        placeholder: "Select…",
+        parse: (s) => s,
+        format: (v) => v ?? "light",
+      }).appendTo(uiRow).on("change", (e) => {
+        const v = e.target.value;
+        setTheme(v);
+        store.setPath("config.theme", v);
+      }).setValue(store.get().config?.theme ?? "light");
+
+      new UI.Text("Density", { muted: true }).appendTo(uiRow);
+      new UI.Select({
+        options: [
+          { value: "comfortable", label: "Comfortable" },
+          { value: "compact",     label: "Compact" },
+        ],
+        placeholder: "Select…",
+        parse: (s) => s,
+        format: (v) => v ?? "comfortable",
+      }).appendTo(uiRow).on("change", (e) => {
+        const v = e.target.value;
+        setDensity(v);
+      }).setValue(document.documentElement.dataset.uiDensity || "comfortable");
+
+      // Form grid (same as before)
       const grid = new UI.Div({
         style: {
           display: "grid",
@@ -327,16 +395,6 @@
 
       addField("Active (box)", new UI.Checkbox(false).bind(store, "agree"));
       addField("Zebra (slider)", new UI.Checkbox(false, { slider: true }).bind(store, "config.zebra"));
-      addField("Dense mode (slider)", new UI.Checkbox(false, { slider: true }).bind(store, "config.themeDense"));
-
-      // Dense theme demo (simple)
-      function syncDense() {
-        const on = !!store.get().config?.themeDense;
-        document.documentElement.style.setProperty("--ui-padding", on ? "8px" : "12px");
-        document.documentElement.style.setProperty("--ui-gap", on ? "8px" : "12px");
-      }
-      syncDense();
-      left.own(store.subscribe(() => syncDense()));
 
       // People actions
       const actions = new UI.HDiv({ gap: 8, wrap: true }).appendTo(left).setStyle({ marginTop: "10px" });
@@ -445,7 +503,7 @@
     });
 
     // -----------------------
-    // TAB: SchemaConfigEditor (User UI + Expert/Ace + Schema editing)
+    // TAB: SchemaConfigEditor
     // -----------------------
     tabs.addTab("json", "JSON (User+Expert)", () => {
       const root = new UI.VDiv({ gap: 12 });
@@ -479,7 +537,6 @@
 
       new UI.Button("Make invalid (anyOf)", { variant: "secondary" }).appendTo(actions)
         .onClick(() => {
-          // constraints requires ttlSeconds OR maxBytes. Setting empty object makes it invalid.
           const cfg = store.get().jsonConfig || {};
           cfg.cache = cfg.cache || {};
           cfg.cache.constraints = {};
@@ -488,7 +545,6 @@
 
       const editorCard = new UI.Card({ title: "Editor" }).appendTo(root);
 
-      // This uses your src/ui/schema-config-editor.js
       const editor = new UI.SchemaConfigEditor({
         store,
         valuePath: "jsonConfig",
@@ -500,7 +556,6 @@
 
       editorCard.add(editor);
 
-      // Show current valid config below
       const preview = new UI.Card({ title: "Current config snapshot" }).appendTo(root);
       const out = new UI.Pre("").appendTo(preview);
       function render() { out.setText(JSON.stringify(store.get().jsonConfig, null, 2)); }
@@ -529,9 +584,7 @@
           { label: "cpu", data: [] },
           { label: "mem", data: [] },
         ],
-        options: {
-          scales: { y: { suggestedMin: 0, suggestedMax: 100 } }
-        }
+        options: { scales: { y: { suggestedMin: 0, suggestedMax: 100 } } }
       }).appendTo(row).setStyle({ flex: "2 1 520px", minWidth: "320px" });
 
       const bar = new UI.BarChartCard({
@@ -678,7 +731,10 @@
       return root;
     });
 
-    // Default tab
+    // Initial apply from <html data-*> (keeps server defaults)
+    setTheme(document.documentElement.dataset.uiTheme || "light");
+    setDensity(document.documentElement.dataset.uiDensity || "comfortable");
+
     tabs.setActive("controls");
   </script>
 </body>

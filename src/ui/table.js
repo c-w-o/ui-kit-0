@@ -62,8 +62,7 @@ export class TableView extends BaseElement {
 
     for (const col of this.columns) {
       const th = document.createElement("th");
-      th.style.border = "1px solid #ccc";
-      th.style.padding = "4px 6px";
+      th.className = "ui-th";
       th.textContent = col.label ?? col.key ?? "";
       if (col.align) th.style.textAlign = col.align;
       tr.appendChild(th);
@@ -77,14 +76,14 @@ export class TableView extends BaseElement {
 
     for (const row of this.data) {
       const tr = document.createElement("tr");
-      tr.style.border = "1px solid #ccc";
-      tr.style.padding = "4px 6px";
+      tr.className = "ui-tr";
       tr.addEventListener("click", () => {
         this.rowClickCb?.(row);
       });
 
       for (const col of this.columns) {
         const td = document.createElement("td");
+        td.className = "ui-td";
         let v = col.key ? row?.[col.key] : undefined;
 
         if (typeof col.format === "function") {

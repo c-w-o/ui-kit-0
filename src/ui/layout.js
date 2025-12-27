@@ -78,12 +78,6 @@ export class Card extends BaseElement {
     this.header.className = "ui-card-header";
     this.body = document.createElement("div");
     this.body.className = "ui-card-body";
-    this.setStyle({
-      border: "1px solid #ccc",
-      borderRadius: "6px",
-      padding: "8px",
-      background: "#fff"
-    });
     this.el.append(this.header, this.body);
 
     this.header.textContent = title ?? "";

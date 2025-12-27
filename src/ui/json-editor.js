@@ -55,7 +55,7 @@ export class JsonTextEditor extends BaseElement {
       this.msg.className = "ui-help error";
       this.msg.innerHTML =
         `<div>Schema error</div>` +
-        `<ul style="margin:4px 0 0 16px; padding:0;">${
+        `<ul class="ui-error-list">${
           res.errors.map(e => `<li>${e.instancePath} ${e.message}</li>`).join("")
         }</ul>`;
     }
