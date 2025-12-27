@@ -15,10 +15,14 @@ export class BaseElement {
 
   setStyle(obj) {
     for (const [k, v] of Object.entries(obj || {})) {
-      // Do not override existing inline styles unless explicitly set
-      if (this.el.style[k] === "") {
-        this.el.style[k] = v;
-      }
+      this.el.style[k] = v;
+    }
+    return this;
+  }
+  
+  initStyle(obj) {
+    for (const [k, v] of Object.entries(obj || {})) {
+      if (this.el.style[k] === "") this.el.style[k] = v;
     }
     return this;
   }

@@ -75,7 +75,7 @@ export class Checkbox extends BaseElement {
     this.el.classList.add("ui-check");
 
     // Minimal fallback styling (CSS can override)
-    this.setStyle({
+    this.initStyle({
       display: "inline-flex",
     });
 

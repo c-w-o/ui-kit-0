@@ -18,7 +18,7 @@ export class Div extends BaseElement {
 export class HDiv extends Div {
   constructor({ gap = 12, wrap = true, align = "stretch", className = "", style = {} } = {}) {
     super({ className: `ui-hdiv ${className}`.trim(), style });
-    this.setStyle({
+    this.initStyle({
       display: "flex",
       flexDirection: "row",
       flexWrap: wrap ? "wrap" : "nowrap",
@@ -31,7 +31,7 @@ export class HDiv extends Div {
 export class VDiv extends Div {
   constructor({ gap = 12, className = "", style = {} } = {}) {
     super({ className: `ui-vdiv ${className}`.trim(), style });
-    this.setStyle({
+    this.initStyle({
       display: "flex",
       flexDirection: "column",
       gap: typeof gap === "number" ? `${gap}px` : gap
@@ -43,7 +43,7 @@ export class VDiv extends Div {
 export class HSpacer extends Div {
   constructor({ flex = 1 } = {}) {
     super({ className: "ui-hspacer" });
-    this.setStyle({ flex: String(flex), minWidth: "0" });
+    this.initStyle({ flex: String(flex), minWidth: "0" });
   }
 }
 
@@ -51,7 +51,7 @@ export class HSpacer extends Div {
 export class VSpacer extends Div {
   constructor({ flex = 1 } = {}) {
     super({ className: "ui-vspacer" });
-    this.setStyle({ flex: String(flex), minHeight: "0" });
+    this.initStyle({ flex: String(flex), minHeight: "0" });
   }
 }
 
