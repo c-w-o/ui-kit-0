@@ -30,7 +30,7 @@ export class ImageView extends BaseElement {
     if (title) this.img.title = title;
 
     // Default styling (won't override user inline styles if you keep initStyle semantics)
-    this.initStyle.({
+    this.initStyle({
       display: "block",
     });
 
