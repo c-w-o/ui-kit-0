@@ -265,9 +265,28 @@ body {
   background: rgba(255, 255, 255, 0.04);
 }
 
+/* ======================================================
+   7) Image
+   ====================================================== */
+
+.ui-image {
+  display: block;
+}
+
+.ui-image-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-image-svg > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 
 /* ------------------------------------------------------
-   7) Checkbox / Switch (label wrapper)
+   8) Checkbox / Switch (label wrapper)
    ------------------------------------------------------ */
 
 .ui-check {
@@ -282,7 +301,7 @@ body {
 
 
 /* ------------------------------------------------------
-   8) json-editor (JSONEditor) — Dark overrides (scoped)
+   9) json-editor (JSONEditor) — Dark overrides (scoped)
    Contract: your mount element has class="json-editor"
    ------------------------------------------------------ */
 

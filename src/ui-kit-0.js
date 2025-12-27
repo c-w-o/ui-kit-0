@@ -2,7 +2,7 @@
 export const UI_KIT_NAME = "ui-kit";
 export const UI_KIT_MAJOR = 0;
 export const UI_KIT_MINOR = 6;
-export const UI_KIT_PATCH = 0;
+export const UI_KIT_PATCH = 1;
 
 export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
 /**
@@ -149,6 +149,7 @@ ensureUiCss();
 export * from "./ui/base.js";
 export * from "./ui/layout.js";
 export * from "./ui/controls.js";
+export * from "./ui/image.js";
 export * from "./ui/table.js";
 export * from "./ui/selection.js";
 export * from "./ui/tabs.js";
