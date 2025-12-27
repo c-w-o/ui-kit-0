@@ -80,14 +80,54 @@ def main():
     # Ergebnis zurückkopieren, wenn wir in $HOME gebaut haben
     if building_in_home:
         built_dist = build_root / "dist"
-        for fn in (out_dev, out_min):
+        for fn in (out_dev, out_dev + ".map", out_min):
             shutil.copy2(built_dist / fn, dist_dir / fn)
     
-    # sbom.json mit nach dist kopieren (wenn vorhanden)
-    sbom_src = build_root / "src" / "sbom.json"
-    if sbom_src.is_file():
-        shutil.copy2(sbom_src, dist_dir / "sbom.json")
+    src_files = ["sbom.json", "ui-kit-.theme.css", "ui-kit-0.css"]
+    for fn in src_files:
+        src_src = build_root / "src" / fn
+        if src_src.is_file():
+            shutil.copy2(src_src, dist_dir / fn)
 
+    doc_files = ["API.md", "README.md", "Styling.md"]
+    for fn in doc_files:
+        doc_src = build_root / fn
+        if doc_src.is_file():
+            shutil.copy2(doc_src, dist_dir / fn)
+    
+    # third_party deploy:
+    # - default: only *.min.js
+    # - exception: include ace/*.js (ace has no min in your tree)
+    # - never include *.map
+    tp_src = build_root / "src" / "third_party"
+    tp_dst = dist_dir / "third_party"
+
+    if tp_src.is_dir():
+        # clean target
+        if tp_dst.exists():
+            shutil.rmtree(tp_dst)
+        tp_dst.mkdir(parents=True, exist_ok=True)
+
+        def copy_rel(src_file: Path):
+            rel = src_file.relative_to(tp_src)
+            out = tp_dst / rel
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src_file, out)
+
+        # 1) copy all *.min.js recursively (no maps)
+        for p in tp_src.rglob("*.min.js"):
+            if p.name.endswith(".map"):
+                continue
+            copy_rel(p)
+
+        # 2) copy ace/*.js (no maps) because ace isn't minified in your tree
+        ace_dir = tp_src / "ace"
+        if ace_dir.is_dir():
+            for p in ace_dir.glob("*.js"):
+                if p.name.endswith(".map"):
+                    continue
+                copy_rel(p)
+    
     print("\nDone:")
     print(f" - dist/{out_dev}")
     print(f" - dist/{out_min}")
