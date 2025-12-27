@@ -224,7 +224,7 @@ export class Select extends BaseElement {
 // --- Simple text blocks --------------------------------------
 
 // Generic text container (div by default)
-export class Text extends BaseElement {
+export class UIKText extends BaseElement {
   constructor(text = "", { tag = "div", muted = false, className = "" } = {}) {
     super(tag);
     if (className) this.el.className = className;
@@ -232,8 +232,9 @@ export class Text extends BaseElement {
     this.setText(text);
   }
 }
+export { UIKText as Text };
 
-export class Label extends Text {
+export class Label extends UIKText {
   constructor(text = "") {
     super(text, { tag: "div", className: "ui-label" });
   }
