@@ -49,5 +49,5 @@ jobs:
             dist/Styling.md
             dist/sbom.json
             dist/*.js
-            dist/*.min.js
+            dist/*.js.map
             dist/*.css
