@@ -17,8 +17,8 @@
   "packages": [
     {
       "SPDXID": "SPDXRef-Package-UI-KIT",
-      "name": "ui-kit-0",
-      "versionInfo": "0.1.0",
+      "name": "ui-kit/0",
+      "versionInfo": "0.6.2",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseDeclared": "MIT",
