@@ -1,9 +1,10 @@
+import { dom } from "./dom.js";
+
 export class BaseElement {
-  constructor(tag) {
+  constructor(tag = "div") {
     this.el = document.createElement(tag);
-    this._cleanup = [];
+    this._owned = [];
     this._children = [];
-    this._destroyed = false;
   }
 
   appendTo(parent) {
@@ -29,46 +30,40 @@ export class BaseElement {
 
   addClass(cls) { this.el.classList.add(cls); return this; }
 
-  // Register a cleanup function to be called on destroy()
-  own(fn) {
-    if (typeof fn === "function") this._cleanup.push(fn);
-    return this;
+  own(disposer) {
+    if (typeof disposer === "function") {
+      this._owned.push(disposer);
+    }
+    return disposer;
   }
 
-  // Attach an event listener and auto-remove it on destroy()
-  on(event, fn, opts) {
-    this.el.addEventListener(event, fn, opts);
-    return this.own(() => this.el.removeEventListener(event, fn, opts));
+  show() { this.el.style.display = ""; return this; }
+  hide() { this.el.style.display = "none"; return this; }
+
+  on(target, evt, selOrHandler, handler, opts) {
+    return this.own(dom.on(target, evt, selOrHandler, handler, opts));
   }
 
   // Own a child: destroy cascades
   add(child) {
     if (!child) return this;
     const node = child.el ?? child;
-    this.el.appendChild(node);
+    if (node && node.parentNode !== this.el) this.el.appendChild(node);
 
     if (child?.destroy) this._children.push(child);
     return this;
   }
 
-  // Idempotent destroy: safe to call multiple times
-  destroy({ remove = true } = {}) {
-    if (this._destroyed) return;
-    this._destroyed = true;
-
-    // Destroy children first (reverse order)
-    for (let i = this._children.length - 1; i >= 0; i--) {
-      try { this._children[i].destroy({ remove: false }); } catch {}
+  destroy({ remove = false } = {}) {
+    for (const ch of this._children.splice(0)) {
+      try { ch.destroy({ remove: true }); } catch {}
     }
-    this._children.length = 0;
-
-    // Run cleanups (reverse order)
-    for (let i = this._cleanup.length - 1; i >= 0; i--) {
-      try { this._cleanup[i](); } catch {}
+    
+    for (const off of this._owned.splice(0)) {
+      try { off(); } catch {}
     }
-    this._cleanup.length = 0;
-
-    // Optionally remove element from DOM
-    if (remove) this.el.remove();
+    if (remove && this.el?.parentNode) {
+      this.el.parentNode.removeChild(this.el);
+    }
   }
 }

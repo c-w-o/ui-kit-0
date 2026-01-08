@@ -1,8 +1,8 @@
 
 export const UI_KIT_NAME = "ui-kit";
 export const UI_KIT_MAJOR = 0;
-export const UI_KIT_MINOR = 6;
-export const UI_KIT_PATCH = 2;
+export const UI_KIT_MINOR = 7;
+export const UI_KIT_PATCH = 0;
 
 export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
 /**
@@ -147,17 +147,22 @@ function ensureUiCss() {
 ensureUiCss();
  
 export * from "./ui/base.js";
-export * from "./ui/layout.js";
-export * from "./ui/controls.js";
-export * from "./ui/image.js";
-export * from "./ui/table.js";
-export * from "./ui/selection.js";
-export * from "./ui/tabs.js";
-export * from "./ui/json-editor.js";
+export * from "./ui/dom.js";
 export * from "./ui/chart.js";
-export * from "./ui/validation.js";
+export * from "./ui/controls.js";
+export * from "./ui/dialog-stack.js";
+export * from "./ui/fsm.js";
+export * from "./ui/image.js";
+export * from "./ui/json-editor.js";
+export * from "./ui/layout.js";
+export * from "./ui/rpc-ws.js";
 export * from "./ui/schema-config-editor.js";
+export * from "./ui/selection.js";
 export * from "./ui/store.js";
+export * from "./ui/tabs.js";
+export * from "./ui/table.js";
+export * from "./ui/timer.js";
+export * from "./ui/validation.js";
 
 // src/ui-kit-0.js (am Ende)
 export const UI = {
