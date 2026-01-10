@@ -1,6 +1,6 @@
 import { dom } from "./dom.js";
 
-class UINode {
+export class UINode {
   constructor(el) {
     this.el = el;
     this._owned = [];

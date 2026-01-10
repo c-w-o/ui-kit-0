@@ -46,6 +46,26 @@ export class Tabs extends BaseElement {
     this.el.appendChild(this.dropdown);   // dropdown is a raw element, so keep it as-is
     this.add(this.panels);                // instead of appendChild(this.panels.el)
 
+    // Keep responsive mode in sync (resize / late fonts / container changes)
+    const scheduleResponsiveUpdate = () => {
+      // Defer to next frame so scrollWidth/clientWidth are correct after layout
+      requestAnimationFrame(() => this._updateResponsiveMode());
+    };
+
+    // Run once after initial mount tick
+    scheduleResponsiveUpdate();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => scheduleResponsiveUpdate());
+      ro.observe(this.el);
+      // bar is the thing we measure for overflow
+      ro.observe(this.group.bar.el);
+      this.own(() => ro.disconnect());
+    } else {
+      const onResize = () => scheduleResponsiveUpdate();
+      window.addEventListener("resize", onResize);
+      this.own(() => window.removeEventListener("resize", onResize));
+    }
   }
   
   destroy(opts = { remove: true }) {
@@ -85,7 +105,8 @@ export class Tabs extends BaseElement {
     this._applyActive();
     this._syncDropdown();
     this._updateResponsiveMode();
-
+    // Defer: measurements can be wrong until after paint
+    requestAnimationFrame(() => this._updateResponsiveMode());
     return this;
   }
 

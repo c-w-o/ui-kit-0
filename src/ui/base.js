@@ -1,27 +1,29 @@
 import { dom } from "./dom.js";
 import { ui } from "./ui.js";
+import { UINode } from "./ui.js";
 
-export class BaseElement {
+
+/**
+ * BaseElement is an INTERNAL convenience layer for widget implementations.
+ *
+ * User-facing API should be the python-like chainable surface from UINode.
+ *
+ * By inheriting from UINode, every widget automatically behaves like a UINode:
+ *  - .add(...)
+ *  - .on(...)
+ *  - .style(...)
+ *  - .destroy(...)
+ */
+export class BaseElement extends UINode {
   constructor(tag = "div") {
-    this.el = ui.node(tag).el;
-    this._owned = [];
-    this._children = [];
+    super(document.createElement(tag));
   }
 
-  appendTo(parent) {
-    const p = dom.get(parent) ?? parent?.el ?? parent;
-    (p ?? document.body).appendChild(this.el);
-    return this;
-  }
+  appendTo(parent) { return super.appendTo(parent); }
 
-  setText(text) { this.el.textContent = text ?? ""; return this; }
+  setText(text) { return this.text(text ?? ""); }
 
-  setStyle(obj) {
-    for (const [k, v] of Object.entries(obj || {})) {
-      this.el.style[k] = v;
-    }
-    return this;
-  }
+  setStyle(obj) { return this.style(obj); }
   
   initStyle(obj) {
     for (const [k, v] of Object.entries(obj || {})) {
@@ -31,13 +33,6 @@ export class BaseElement {
   }
 
   addClass(cls) { this.el.classList.add(cls); return this; }
-
-  own(disposer) {
-    if (typeof disposer === "function") {
-      this._owned.push(disposer);
-    }
-    return disposer;
-  }
 
   show() { this.el.style.display = ""; return this; }
   hide() { this.el.style.display = "none"; return this; }
@@ -52,11 +47,7 @@ export class BaseElement {
    *   this.on(otherEl, 'click', '.child', handler)
    */
   on(a, b, c, d, e) {
-    // overload: (evt, handler) or (evt, selector, handler)
-    if (typeof a === "string") {
-      return this.own(dom.on(this.el, a, b, c, d));
-    }
-    // full: (target, evt, ...)
+    if (typeof a === "string") return super.on(a, b, c);
     return this.own(dom.on(a, b, c, d, e));
   }
 
@@ -79,16 +70,5 @@ export class BaseElement {
     return this;
   }
 
-  destroy({ remove = false } = {}) {
-    for (const ch of this._children.splice(0)) {
-      try { ch.destroy({ remove: true }); } catch {}
-    }
-    
-    for (const off of this._owned.splice(0)) {
-      try { off(); } catch {}
-    }
-    if (remove && this.el?.parentNode) {
-      this.el.parentNode.removeChild(this.el);
-    }
-  }
+  destroy(opts = { remove: false }) { return super.destroy(opts); }
 }

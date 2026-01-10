@@ -105,6 +105,12 @@ export class Store {
     if (exact) for (const fn of exact) fn(this.getPath(path), this.state, path);
 
     const star = this.pathListeners.get("*");
-    if (star) for (const fn of star) fn(undefined, this.state, path);
+    // "*" listeners receive (changedValue, state, changedPath)
+    // - for path "*" (set/merge/batch flush), changedValue === state
+    // - otherwise changedValue is the value at the changed path
+    if (star) {
+      const changedValue = (path === "*" || !path) ? this.state : this.getPath(path);
+      for (const fn of star) fn(changedValue, this.state, path);
+    }
   }
 }
