@@ -1,5 +1,6 @@
 import { BaseElement } from "./base.js";
 import { makeValidator } from "./validation.js";
+import { ui } from "./ui.js";
 
 export class JsonTextEditor extends BaseElement {
   constructor({ schema, initialValue = {}, onChange } = {}) {
@@ -9,10 +10,10 @@ export class JsonTextEditor extends BaseElement {
     this.onChangeCb = onChange;
     this.onValidCb = null;
 
-    this.text = document.createElement("textarea");
+    this.text = ui.textarea().el;
     this.text.classList.add("ui-textarea");
     
-    this.msg = document.createElement("div");
+    this.msg = ui.div().el;
     this.msg.className = "ui-help";
 
     this.el.append(this.text, this.msg);
@@ -53,11 +54,12 @@ export class JsonTextEditor extends BaseElement {
     } else {
       this.text.classList.add("invalid");
       this.msg.className = "ui-help error";
-      this.msg.innerHTML =
-        `<div>Schema error</div>` +
-        `<ul class="ui-error-list">${
-          res.errors.map(e => `<li>${e.instancePath} ${e.message}</li>`).join("")
-        }</ul>`;
+      const items = (res.errors || []).map(e => `${e.instancePath ?? ""} ${e.message ?? ""}`.trim());
+      const box = ui.vdiv().add(
+        ui.text("Schema error"),
+        ui.ul(items).cls("ui-error-list").left()
+      );
+      this.msg.replaceChildren(box.el);
     }
 
     this.onChangeCb?.(data, res);

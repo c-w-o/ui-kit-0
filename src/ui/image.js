@@ -10,6 +10,8 @@ import { BaseElement } from "./base.js";
  * This class removes <script> nodes, but that is NOT a full sanitizer.
  * Treat inline SVG as "trusted input only".
  */
+import { ui } from "./ui.js";
+
 export class ImageView extends BaseElement {
   constructor({
     src = null,
@@ -24,7 +26,7 @@ export class ImageView extends BaseElement {
     super("div");
     this.el.className = `ui-image ${className}`.trim();
 
-    this.img = document.createElement("img");
+    this.img = ui.img().el;
     this.img.className = "ui-image-img";
     this.img.alt = alt ?? "";
     if (title) this.img.title = title;
@@ -135,7 +137,7 @@ export class ImageView extends BaseElement {
     if (this.img.isConnected) this.img.remove();
 
     if (!this._inlineHost) {
-      this._inlineHost = document.createElement("div");
+      this._inlineHost = ui.div().el;
       this._inlineHost.className = "ui-image-svg";
       this.el.appendChild(this._inlineHost);
     }

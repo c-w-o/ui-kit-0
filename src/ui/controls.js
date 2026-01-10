@@ -1,4 +1,5 @@
 import { BaseElement } from "./base.js";
+import { ui } from "./ui.js";
 
 export class Button extends BaseElement {
   constructor(text, { variant = "primary" } = {}) {
@@ -80,11 +81,10 @@ export class Checkbox extends BaseElement {
     });
 
     // Real checkbox input
-    this.input = document.createElement("input");
-    this.input.type = "checkbox";
+    this.input = ui.input("checkbox").el;
     this.input.checked = !!checked;
 
-    this.textEl = document.createElement("span");
+    this.textEl = ui.span().el;
     this.textEl.classList.add("ui-checkbox-text");
     this.textEl.textContent = label;
 
@@ -96,10 +96,10 @@ export class Checkbox extends BaseElement {
       // IMPORTANT:
       // .ui-switch in ui-kit-0.css is a fixed-size switch box (44x24).
       // Therefore it must NOT be on the outer <label>. Put it on an inner element.
-      this.switchBox = document.createElement("span");
+      this.switchBox = ui.span().el;
       this.switchBox.className = "ui-switch";
     
-      this.sliderEl = document.createElement("span");
+      this.sliderEl = ui.span().el;
       this.sliderEl.className = "ui-slider";
     
       // switchBox contains only input + slider visuals
@@ -178,7 +178,7 @@ export class Select extends BaseElement {
     this.el.innerHTML = "";
 
     if (placeholder != null) {
-      const o = document.createElement("option");
+      const o = ui.option(String(placeholder), "").el;
       o.value = "";
       o.textContent = String(placeholder);
       this.el.appendChild(o);
@@ -188,7 +188,7 @@ export class Select extends BaseElement {
       const value = (opt && typeof opt === "object") ? opt.value : opt;
       const label = (opt && typeof opt === "object") ? (opt.label ?? opt.value) : opt;
 
-      const o = document.createElement("option");
+      const o = ui.option(label, value).el;
       o.value = String(value);
       o.textContent = String(label);
       this.el.appendChild(o);

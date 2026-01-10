@@ -46,6 +46,18 @@ export class StateMachine {
 
     this._queue = Promise.resolve(); // serialize transitions/dispatches
     this._started = false;
+    this._owned = [];
+  }
+
+  own(disposer) {
+    if (typeof disposer === "function") this._owned.push(disposer);
+    return disposer;
+  }
+
+  destroy() {
+    for (const off of this._owned.splice(0)) {
+      try { off(); } catch {}
+    }
   }
 
   addState(state) {
@@ -121,5 +133,29 @@ export class StateMachine {
       if (to.enter) await to.enter(this.ctx, payload);
     });
     return this._queue;
+  }
+
+  /**
+   * Convenience integration: watch a Store path and dispatch an FSM event.
+   *
+   * @param {Store} store   - store with subscribePath(path, fn)
+   * @param {string} path   - e.g. "conn.status" or "*"
+   * @param {string} event  - event to dispatch
+   * @param {(value:any, state:any, changedPath:string)=>any} mapPayload - optional mapping
+   * @param {{immediate?:boolean}} opts
+   */
+  watchStore(store, path, event, mapPayload = null, opts = {}) {
+    if (!store?.subscribePath) throw new Error("StateMachine.watchStore: store.subscribePath missing");
+    const off = store.subscribePath(path, (value, state, changedPath) => {
+      const payload = mapPayload ? mapPayload(value, state, changedPath) : value;
+      this.dispatch(event, payload);
+    });
+    this.own(off);
+    if (opts.immediate) {
+      const v = store.getPath ? store.getPath(path) : undefined;
+      const payload = mapPayload ? mapPayload(v, store.get?.(), path) : v;
+      this.dispatch(event, payload);
+    }
+    return off;
   }
 }

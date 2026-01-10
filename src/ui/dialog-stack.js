@@ -60,6 +60,7 @@ export class ModalDialog extends BaseElement {
 
     this._shown = false;
     this._restoreFocusEl = null;
+    this._contentOwned = [];
 
     this.el.className = "ui-modal-overlay";
     this.el.setAttribute("role", "dialog");
@@ -79,10 +80,28 @@ export class ModalDialog extends BaseElement {
   }
 
   setContent(nodeOrElement) {
+    // Destroy previous tracked content (if any)
+    for (const ch of this._contentOwned.splice(0)) {
+      try { ch.destroy({ remove: true }); } catch {}
+    }
+
+    // Clear DOM (covers raw nodes that don't have destroy())
     this.panel.el.innerHTML = "";
-    if (nodeOrElement?.el) this.panel.el.appendChild(nodeOrElement.el);
-    else if (nodeOrElement instanceof Node) this.panel.el.appendChild(nodeOrElement);
-    else if (typeof nodeOrElement === "string") this.panel.el.textContent = nodeOrElement;
+
+    if (typeof nodeOrElement === "string") {
+      this.panel.el.textContent = nodeOrElement;
+      return this;
+    }
+
+    if (!nodeOrElement) return this;
+
+    // Use panel.add(...) so BaseElement children get tracked properly.
+    this.panel.add(nodeOrElement);
+
+    // Additionally track on the modal instance too, so we can destroy content
+    // on subsequent setContent() calls (panel.add only guarantees cleanup when
+    // the whole dialog is destroyed).
+    if (nodeOrElement?.destroy) this._contentOwned.push(nodeOrElement);
     return this;
   }
 

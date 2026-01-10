@@ -162,6 +162,7 @@ export * from "./ui/store.js";
 export * from "./ui/tabs.js";
 export * from "./ui/table.js";
 export * from "./ui/timer.js";
+export * from "./ui/ui.js";
 export * from "./ui/validation.js";
 
 // src/ui-kit-0.js (am Ende)

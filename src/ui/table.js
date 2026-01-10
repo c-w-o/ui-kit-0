@@ -1,4 +1,5 @@
 import { BaseElement } from "./base.js";
+import { ui } from "./ui.js";
 
 export class TableView extends BaseElement {
   constructor({ columns = [], data = [], zebra = true } = {}) {
@@ -7,18 +8,28 @@ export class TableView extends BaseElement {
     this.data = data;
     this.rowClickCb = null;
 
-    this.table = document.createElement("table");
+    this.table = ui.table().el;
     this.table.className = "ui-table";
     if (zebra) this.table.classList.add("zebra");
     this.table.style.borderCollapse = "collapse";
     this.table.style.width = "100%";
 
-    this.thead = document.createElement("thead");
-    this.tbody = document.createElement("tbody");
+    this.thead = ui.thead().el;
+    this.tbody = ui.tbody().el;
 
     this.table.appendChild(this.thead);
     this.table.appendChild(this.tbody);
     this.el.appendChild(this.table);
+
+    // Event delegation: one click handler for all rows (no per-row listeners)
+    // dom.on(...) passes (event, matchedElement) for delegated handlers.
+    this.on(this.tbody, "click", "tr", (e, tr) => {
+      const idx = tr?.dataset?.rowIndex ? parseInt(tr.dataset.rowIndex, 10) : NaN;
+      if (!Number.isFinite(idx)) return;
+      const row = this.data?.[idx];
+      if (row === undefined) return;
+      this.rowClickCb?.(row, idx, tr, e);
+    });
 
     this.render();
   }
@@ -58,10 +69,10 @@ export class TableView extends BaseElement {
 
   renderHead() {
     this.thead.innerHTML = "";
-    const tr = document.createElement("tr");
+    const tr = ui.tr().el;
 
     for (const col of this.columns) {
-      const th = document.createElement("th");
+      const th = ui.th().el;
       th.className = "ui-th";
       th.textContent = col.label ?? col.key ?? "";
       if (col.align) th.style.textAlign = col.align;
@@ -74,15 +85,14 @@ export class TableView extends BaseElement {
   renderBody() {
     this.tbody.innerHTML = "";
 
-    for (const row of this.data) {
-      const tr = document.createElement("tr");
+    for (let i = 0; i < this.data.length; i++) {
+      const row = this.data[i];
+      const tr = ui.tr().el;
       tr.className = "ui-tr";
-      tr.addEventListener("click", () => {
-        this.rowClickCb?.(row);
-      });
+      tr.dataset.rowIndex = String(i);
 
       for (const col of this.columns) {
-        const td = document.createElement("td");
+        const td = ui.td().el;
         td.className = "ui-td";
         let v = col.key ? row?.[col.key] : undefined;
 

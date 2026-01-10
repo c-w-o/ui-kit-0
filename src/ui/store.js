@@ -11,6 +11,9 @@ export class Store {
     this.state = clone(initial);
     this.listeners = new Set();     // global listeners
     this.pathListeners = new Map(); // path -> Set(fn)
+
+     this._batchDepth = 0;
+    this._batchedPaths = new Set();
   }
 
   get() {
@@ -49,6 +52,11 @@ export class Store {
     this._emit(path);
   }
 
+  updatePath(path, fn) {
+    const prev = this.getPath(path);
+    this.setPath(path, fn(prev));
+  }
+
   // Set whole state (replaces)
   set(next) {
     this.state = clone(next);
@@ -59,6 +67,18 @@ export class Store {
   merge(partial) {
     this.state = { ...this.state, ...clone(partial) };
     this._emit("*");
+  }
+
+  batch(fn) {
+    this._batchDepth++;
+    try { fn(); }
+    finally {
+      this._batchDepth--;
+      if (this._batchDepth === 0 && this._batchedPaths.size) {
+        this._batchedPaths.clear();
+        this._emit("*");
+      }
+    }
   }
 
   subscribe(fn) {
@@ -73,6 +93,10 @@ export class Store {
   }
 
   _emit(path) {
+    if (this._batchDepth > 0) {
+      this._batchedPaths.add(path);
+      return;
+    }
     // Global listeners: receive (state, changedPath)
     for (const fn of this.listeners) fn(this.state, path);
 

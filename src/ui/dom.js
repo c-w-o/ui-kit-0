@@ -73,3 +73,20 @@ export const dom = {
     return c; // DocumentFragment
   },
 };
+
+export class EventRegistry {
+  constructor() {
+    this._owned = [];
+  }
+
+  own(disposer) {
+    if (typeof disposer === "function") this._owned.push(disposer);
+    return disposer;
+  }
+
+  destroy() {
+    for (const off of this._owned.splice(0)) {
+      try { off(); } catch {}
+    }
+  }
+}

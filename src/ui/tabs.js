@@ -1,4 +1,5 @@
-// src/ui/tabs.js
+import { ui } from "./ui.js";
+
 import { BaseElement } from "./base.js";
 import { VDiv } from "./layout.js";
 import { SelectionGroup } from "./selection.js";
@@ -31,13 +32,11 @@ export class Tabs extends BaseElement {
     });
 
     // Dropdown (responsive fallback)
-    this.dropdown = document.createElement("select");
+    this.dropdown = ui.select().el;
     this.dropdown.className = "ui-tabselect";
     
-    // Register dropdown handler with cleanup
-    const onDropChange = () => this.setActive(this.dropdown.value);
-    this.dropdown.addEventListener("change", onDropChange);
-    this.own(() => this.dropdown.removeEventListener("change", onDropChange));
+    // Register dropdown handler with cleanup (via BaseElement + dom.on disposer)
+    this.on(this.dropdown, "change", () => this.setActive(this.dropdown.value));
     
     // Panels container (owned child)
     this.panels = new VDiv({ className: "ui-tabpanels" });
@@ -61,7 +60,7 @@ export class Tabs extends BaseElement {
     // content can be: BaseElement | Node | () => BaseElement/Node
     const factory = (typeof content === "function") ? content : () => content;
 
-    const panel = document.createElement("div");
+    const panel = ui.div().el;
     panel.className = "ui-tabpanel";
     panel.setAttribute("role", "tabpanel");
 
@@ -72,7 +71,7 @@ export class Tabs extends BaseElement {
     this.group.addItem(id, title);
 
     // Add option to dropdown
-    const opt = document.createElement("option");
+    const opt = ui.option(title, id).el;
     opt.value = id;
     opt.textContent = title;
     this.dropdown.appendChild(opt);

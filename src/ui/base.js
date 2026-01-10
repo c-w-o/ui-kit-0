@@ -1,14 +1,16 @@
 import { dom } from "./dom.js";
+import { ui } from "./ui.js";
 
 export class BaseElement {
   constructor(tag = "div") {
-    this.el = document.createElement(tag);
+    this.el = ui.node(tag).el;
     this._owned = [];
     this._children = [];
   }
 
   appendTo(parent) {
-    (parent.el ?? parent).appendChild(this.el);
+    const p = dom.get(parent) ?? parent?.el ?? parent;
+    (p ?? document.body).appendChild(this.el);
     return this;
   }
 
@@ -40,17 +42,40 @@ export class BaseElement {
   show() { this.el.style.display = ""; return this; }
   hide() { this.el.style.display = "none"; return this; }
 
-  on(target, evt, selOrHandler, handler, opts) {
-    return this.own(dom.on(target, evt, selOrHandler, handler, opts));
+  /**
+   * Event binding with automatic cleanup.
+   *
+   * Supported forms:
+   *   this.on('click', handler)
+   *   this.on('click', '.child', (e, el) => ...)
+   *   this.on(otherEl, 'click', handler)
+   *   this.on(otherEl, 'click', '.child', handler)
+   */
+  on(a, b, c, d, e) {
+    // overload: (evt, handler) or (evt, selector, handler)
+    if (typeof a === "string") {
+      return this.own(dom.on(this.el, a, b, c, d));
+    }
+    // full: (target, evt, ...)
+    return this.own(dom.on(a, b, c, d, e));
   }
 
-  // Own a child: destroy cascades
-  add(child) {
-    if (!child) return this;
-    const node = child.el ?? child;
-    if (node && node.parentNode !== this.el) this.el.appendChild(node);
+  add(...children) {
+    return this.addTo(this.el, ...children);
+  }
 
-    if (child?.destroy) this._children.push(child);
+  /**
+   * Append children into an arbitrary container element while still
+   * participating in ownership tracking (destroy() cascades).
+   */
+  addTo(container, ...children) {
+    const target = container?.el ?? container;
+    for (const child of children.flat(Infinity)) {
+      if (!child) continue;
+      const node = child.el ?? child;
+      if (node && node.parentNode !== target) target.appendChild(node);
+      if (child?.destroy) this._children.push(child);
+    }
     return this;
   }
 

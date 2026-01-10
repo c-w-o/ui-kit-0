@@ -3,6 +3,7 @@ import { Tabs } from "./tabs.js";
 import { Card, HDiv, VDiv } from "./layout.js";
 import { Button, Text } from "./controls.js";
 import { makeValidator } from "./validation.js";
+import { ui } from "./ui.js";
 function deps() {
   return {
     ajv: !!(window.ajv7 || window.Ajv),
@@ -90,12 +91,12 @@ this.tabs.addTab("expert", "Expert", () => (d.ace ? this._buildExpertTab() : thi
     root.add(new Text("Fallback: plain textarea editing (no syntax highlight).", { muted: true }));
   
     const cardVal = new Card({ title: "Value JSON (fallback)" }).appendTo(root);
-    const taVal = document.createElement("textarea");
+    const taVal = ui.textarea().el;
     taVal.className = "ui-textarea expert";
     cardVal.el.appendChild(taVal);
   
     const cardSchema = new Card({ title: this.schemaPath ? "Schema JSON (fallback)" : "Schema JSON (read-only fallback)" }).appendTo(root);
-    const taSchema = document.createElement("textarea");
+    const taSchema = ui.textarea().el;
     taSchema.className = "ui-textarea expert";
     taSchema.readOnly = !this.schemaPath;
     cardSchema.el.appendChild(taSchema);
@@ -189,7 +190,7 @@ this.tabs.addTab("expert", "Expert", () => (d.ace ? this._buildExpertTab() : thi
     this.userStatus = new Text("…", { muted: true }).appendTo(root);
 
     // mount point for json-editor
-    this.userMount = document.createElement("div");
+    this.userMount = ui.div().el;
     this.userMount.classList.add("json-editor");
     this.userMount.style.minHeight = "80px";
     card.el.appendChild(this.userMount);

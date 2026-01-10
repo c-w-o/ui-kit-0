@@ -1,17 +1,11 @@
 import { BaseElement } from "./base.js";
+import { ui } from "./ui.js";
 
 export class Div extends BaseElement {
   constructor({ className = "", style = {} } = {}) {
     super("div");
     if (className) this.el.className = className;
     this.setStyle(style);
-  }
-
-  // Add a child (BaseElement or DOM node)
-  add(child) {
-    if (!child) return this;
-    this.el.appendChild(child.el ?? child);
-    return this;
   }
 }
 
@@ -74,9 +68,9 @@ export class Card extends BaseElement {
     super("div");
     this.addClass("card");
 
-    this.header = document.createElement("div");
+    this.header = ui.div().el;
     this.header.className = "ui-card-header";
-    this.body = document.createElement("div");
+    this.body = ui.div().el;
     this.body.className = "ui-card-body";
     this.el.append(this.header, this.body);
 
@@ -96,9 +90,9 @@ export class Card extends BaseElement {
    *     .ui-card-body  <-- children go here
    */
   add(child) {
-    if (!child) return this;
-    this.body.appendChild(child.el ?? child);
-    return this;
+    // Important: keep BaseElement ownership tracking intact so that
+    // destroy() cascades into children.
+    return this.addTo(this.body, child);
   }
 
   /**
