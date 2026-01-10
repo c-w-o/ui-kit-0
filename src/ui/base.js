@@ -38,8 +38,6 @@ export class BaseElement extends UINode {
   hide() { this.el.style.display = "none"; return this; }
 
   /**
-   * Event binding with automatic cleanup.
-   *
    * Supported forms:
    *   this.on('click', handler)
    *   this.on('click', '.child', (e, el) => ...)
@@ -51,9 +49,7 @@ export class BaseElement extends UINode {
     return this.own(dom.on(a, b, c, d, e));
   }
 
-  add(...children) {
-    return this.addTo(this.el, ...children);
-  }
+  add(...children) { return super.add(...children); }
 
   /**
    * Append children into an arbitrary container element while still
