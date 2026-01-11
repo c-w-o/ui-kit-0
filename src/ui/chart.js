@@ -1,6 +1,7 @@
 // src/ui/chart.js
 import { BaseElement } from "./base.js";
 import { Card } from "./layout.js";
+import { Text } from "./controls.js";
 
 /**
  * ChartView wraps Chart.js (UMD global: window.Chart).
@@ -29,6 +30,9 @@ export class ChartView extends BaseElement {
     this.height = height;
 
     this.chart = null;
+    this._rafPending = false;
+    this._lastMapped = null;
+    this._bindOff = null;
 
     // Make sizing predictable for responsive charts
     this.el.style.width = "100%";
@@ -73,6 +77,20 @@ export class ChartView extends BaseElement {
     return true;
   }
 
+  _scheduleUpdate(nextData) {
+    // Coalesce to 1 update per animation frame.
+    this._lastMapped = nextData;
+    if (this._rafPending) return;
+    this._rafPending = true;
+    requestAnimationFrame(() => {
+      this._rafPending = false;
+      const data = this._lastMapped;
+      this._lastMapped = null;
+      // Use setData() so lazy-init works.
+      this.setData(data);
+    });
+  }
+
   /**
    * Update chart data (no rebuild). If chart isn't ready yet, it will
    * initialize on the next animation frame when connected.
@@ -107,11 +125,14 @@ export class ChartView extends BaseElement {
     const update = () => {
       const state = store.get();
       const next = mapper(state);
-      this.setData(next);
+      // IMPORTANT: coalesce updates; Chart.js update() is not cheap.
+      this._scheduleUpdate(next);
     };
 
     update();
-    this.own(store.subscribe(() => update()));
+    // keep handle so we can unbind deterministically
+    this._bindOff = store.subscribe(() => update());
+    this.own(() => { try { this._bindOff?.(); } catch {} this._bindOff = null; });
     return this;
   }
 

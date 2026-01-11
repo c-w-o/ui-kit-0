@@ -1,3 +1,4 @@
+// src/ui/fsm.js
 /**
  * Finite State Machine (FSM)
  * --------------------------
@@ -37,16 +38,40 @@ export class StateMachine {
    *  onTransition?: (info:{from:string|null,to:string,event:string|null,payload:any}) => void
    * }} opts
    */
-  constructor(ctx = {}, opts = {}) {
+  constructor(ctxOrConfig = {}, opts = {}) {
+    // If user passes config object: {initial, states, ctx, onTransition}
+    const looksLikeConfig =
+      ctxOrConfig &&
+      typeof ctxOrConfig === "object" &&
+      ("states" in ctxOrConfig || "initial" in ctxOrConfig || "onTransition" in ctxOrConfig) &&
+      // avoid treating arbitrary ctx objects as config unless they declare states/initial
+      !("dispatch" in ctxOrConfig) &&
+      !("transitionTo" in ctxOrConfig);
+
+    const config = looksLikeConfig ? ctxOrConfig : null;
+    const ctx = config ? (config.ctx ?? {}) : (ctxOrConfig ?? {});
+    const o = config ? config : (opts ?? {});
+
     this.ctx = ctx;
     this.states = new Map();
     this.current = null; // State
-    this.initial = opts.initial ?? null;
-    this.onTransition = opts.onTransition ?? null;
+    this.initial = o.initial ?? null;
+    this.onTransition = o.onTransition ?? null;
 
     this._queue = Promise.resolve(); // serialize transitions/dispatches
     this._started = false;
     this._owned = [];
+
+    if (config?.states && typeof config.states === "object") {
+      for (const [name, def] of Object.entries(config.states)) {
+        this.addState(new State(name, def || {}));
+      }
+      if (this.initial) {
+        // auto-start if initial is provided (keeps old behavior if user calls start() explicitly)
+        // NOTE: start() is async; we intentionally fire-and-forget here.
+        this.start().catch(() => {});
+      }
+    }
   }
 
   own(disposer) {
@@ -100,6 +125,10 @@ export class StateMachine {
       }
     });
     return this._queue;
+  }
+
+  send(event, payload = undefined) {
+    return this.dispatch(event, payload);
   }
 
   /**

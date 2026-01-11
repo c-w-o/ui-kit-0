@@ -271,9 +271,9 @@
       new Button("Clamp counter [0..50]").on("click", () => store.set({ counter: clamp(store.state.counter, 0, 50) }))
     ));
 
-    tabs.addTab("Layout", tab1);
-    tabs.addTab("State", tab2);
-    tabs.addTab("Actions", tab3);
+    tabs.addTab("layout", "Layout", () => tab1);
+    tabs.addTab("state", "State", () => tab2);
+    tabs.addTab("actions", "Actions", () => tab3);
 
     tabsCard.body.add(tabs);
 
@@ -316,7 +316,10 @@
       const f = (store.state.table.filter || "").toLowerCase().trim();
       const size = store.state.table.pageSize || 12;
       const filtered = !f ? rows : rows.filter(r => String(r.name).toLowerCase().includes(f));
-      table.setData(filtered.slice(0, size));
+      const slice = filtered.slice(0, size);
+      if (typeof table.setRows === "function") table.setRows(slice);
+      else if (typeof table.setData === "function") table.setData(slice);
+      else table.data = slice; // last resort if your TableView reads .data
     }
 
     table.onRowClick((row, idx) => log(`table row click => idx=${idx} id=${row.id} name=${row.name}`));
@@ -397,6 +400,14 @@
       features: ["tabs", "table", "chart", "store", "fsm"]
     };
 
+    // SchemaConfigEditor ist STORE-gebunden:
+    // - value liegt im Store unter valuePath (default: "jsonConfig")
+    // - schema kommt entweder als "schema" (fix) oder aus schemaPath (editable)
+    store.setPath("jsonConfig", initialConfig);
+    // optional: Schema im Store halten, damit Expert-Tab Schema editieren kann
+    // store.setPath("jsonSchema", schema);
+
+
     // JsonTextEditor is your lightweight textarea+AJV validator (exported name!)
     const jsonTextEditor = new JsonTextEditor({
       schema,
@@ -413,8 +424,11 @@
     // - window.JSONEditor (visual form editor)
     // - window.ace (expert JSON editor)
     const schemaEditor = new SchemaConfigEditor({
-      schema,
-      value: initialConfig
+      store,
+      title: "Config Editor",
+      valuePath: "jsonConfig",
+      schema, // fix schema; alternativ: schemaPath: "jsonSchema"
+      // schemaPath: "jsonSchema",
     });
 
     // Optional wiring: if SchemaConfigEditor exposes onChange, mirror into JsonTextEditor

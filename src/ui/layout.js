@@ -68,17 +68,21 @@ export class Card extends BaseElement {
     super("div");
     this.addClass("card");
 
-    this.header = ui.div().el;
-    this.header.className = "ui-card-header";
-    this.body = ui.div().el;
-    this.body.className = "ui-card-body";
-    this.el.append(this.header, this.body);
+    this.header = ui.div().cls("ui-card-header");
+    this.body = ui.div().cls("ui-card-body");
 
-    this.header.textContent = title ?? "";
+    // Backwards-compat: raw elements if existing code relied on them
+    this.headerEl = this.header.el;
+    this.bodyEl = this.body.el;
+
+    // Keep ownership + destroy cascading by adding via BaseElement/UINode layer
+    this.addTo(this.el, this.header, this.body);
+
+    this.setTitle(title);
   }
 
   setTitle(title) {
-    this.header.textContent = title ?? "";
+    this.header.text(title ?? "");
     return this;
   }
 
@@ -89,24 +93,24 @@ export class Card extends BaseElement {
    *     .ui-card-header
    *     .ui-card-body  <-- children go here
    */
-  add(child) {
-    // Important: keep BaseElement ownership tracking intact so that
-    // destroy() cascades into children.
-    return this.addTo(this.body, child);
+  add(...children) {
+    // Add content to card body (NOT the root).
+    return this.addTo(this.body, ...children);
   }
 
   /**
    * Convenience alias (optional): same as add().
    */
-  append(child) {
-    return this.add(child);
+  append(...children) {
+    return this.add(...children);
   }
 
   /**
    * Convenience: clear body content.
    */
   clear() {
-    this.body.textContent = "";
+    // clear only body content (keep header intact)
+    this.bodyEl.replaceChildren();
     return this;
   }
 }

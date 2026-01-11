@@ -1,6 +1,5 @@
 import { BaseElement } from "./base.js";
 import { Tabs } from "./tabs.js";
-import { Card, HDiv, VDiv } from "./layout.js";
 import { Card, HDiv, VDiv, HSpacer } from "./layout.js";
 import { Button, Text } from "./controls.js";
 import { makeValidator } from "./validation.js";
@@ -221,7 +220,6 @@ this.tabs.addTab("expert", "Expert", () => (d.ace ? this._buildExpertTab() : thi
 
     const top = new HDiv({ gap: 8, wrap: true, align: "center" }).appendTo(root);
     this.expertStatus = new Text("…", { muted: true }).appendTo(top);
-    top.add(new Text("", { muted: true })); // spacer-ish for your layout (optional)
     top.add(new HSpacer());
 
     const actions = new HDiv({ gap: 8, wrap: true }).appendTo(root);

@@ -58,11 +58,18 @@ export class UINode {
   // --- attributes / style
   id(v) { this.el.id = v; return this; }
   cls(...names) {
-    const flat = names.flat(Infinity).filter(Boolean);
+    const flat = names
+      .flat(Infinity)
+      .filter(Boolean)
+      .flatMap(x => String(x).trim().split(/\s+/g).filter(Boolean));
     if (flat.length) this.el.classList.add(...flat);
     return this;
   }
   attr(k, v) {
+    if (k === "class") {
+      this.el.className = String(v ?? "");
+      return this;
+    }
     if (v == null) this.el.removeAttribute(k);
     else this.el.setAttribute(k, String(v));
     return this;
@@ -81,10 +88,19 @@ export class UINode {
 
   // --- events (disposer-aware)
   on(evt, handler, opts) {
-    return this.own(dom.on(this.el, evt, handler, opts));
+    this.own(dom.on(this.el, evt, handler, opts));
+    return this;
   }
   onSel(evt, selector, handler, opts) {
-    return this.own(dom.on(this.el, evt, selector, handler, opts));
+    this.own(dom.on(this.el, evt, selector, handler, opts));
+    return this;
+  }
+
+  listen(evt, handler, opts) {
+    return dom.on(this.el, evt, handler, opts);
+  }
+  listenSel(evt, selector, handler, opts) {
+    return dom.on(this.el, evt, selector, handler, opts);
   }
 
   // --- text helpers
@@ -152,6 +168,8 @@ export const ui = {
   // layout helpers
   hdiv() { return node("div").style({ display: "flex", flexDirection: "row", alignItems: "center" }); },
   vdiv() { return node("div").style({ display: "flex", flexDirection: "column" }); },
+  hspacer(grow = 1) { return node("div").style({ flex: `${grow} 1 auto`, minWidth: "0" }); },
+  vspacer(grow = 1) { return node("div").style({ flex: `${grow} 1 auto`, minHeight: "0" }); },
 
   // table helpers
   table() { return node("table"); },
