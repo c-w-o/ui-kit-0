@@ -58,9 +58,31 @@ export class Store {
   }
 
   // Set whole state (replaces)
-  set(next) {
-    this.state = clone(next);
-    this._emit("*");
+  // Set (shallow merge at root + notify changed root keys)
+  set(partial) {
+    const prev = this.state;
+    const next = { ...prev, ...clone(partial) };
+    this.state = next;
+  
+    // 1) globale Listener EINMAL informieren (wie bisher)
+    for (const fn of this.listeners) fn(this.state, "*");
+  
+    // 2) "*" path-listeners (wie _emit("*"))
+    const star = this.pathListeners.get("*");
+    if (star) {
+      for (const fn of star) fn(this.state, this.state, "*");
+    }
+  
+    // 3) root-key path-listeners für tatsächlich geänderte Keys
+    for (const key of Object.keys(partial)) {
+      if (prev?.[key] !== next?.[key]) {
+        const exact = this.pathListeners.get(key);
+        if (exact) {
+          const v = next[key];
+          for (const fn of exact) fn(v, this.state, key);
+        }
+      }
+    }
   }
 
   // Shallow merge at root

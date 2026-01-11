@@ -229,7 +229,15 @@
     }
 
     // Store -> UI
-    store.subscribePath("counter", (v) => counterText.setText(`counter = ${v}`), { immediate: true });
+    chart.bind(store, (state) => {
+      const pts = state.chart?.points ?? [];
+      return {
+        labels: pts.map(p => p.x),
+        datasets: [
+          { label: "Score", data: pts.map(p => p.y) }
+        ]
+      };
+    });
     store.subscribePath("text", (v) => { if (textInput.el.value !== v) textInput.el.value = v; }, { immediate: true });
     store.subscribePath("enabled", (v) => {
       enabledToggle.el.checked = !!v;
