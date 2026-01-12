@@ -121,9 +121,22 @@
     const fsm = new StateMachine({
       initial: "idle",
       states: {
-        idle:   { on: { START: "running" } },
-        running:{ on: { STOP: "idle", ERROR: "error" } },
-        error:  { on: { RESET: "idle" } }
+        idle: {
+          on: {
+            START: () => ({ to: "running" }),
+          }
+        },
+        running: {
+          on: {
+            STOP:  () => ({ to: "idle" }),
+            ERROR: () => ({ to: "error" }),
+          }
+        },
+        error: {
+          on: {
+            RESET: () => ({ to: "idle" }),
+          }
+        }
       }
     });
 
@@ -150,17 +163,20 @@
       ui.button("Compact").on("click", () => setDensity("compact"))
     );
 
-    const fsmBadge = ui.text("FSM: idle").cls("ui-badge");
-    const updateFsmBadge = () => fsmBadge.text(`FSM: ${fsm.state ?? fsm.current ?? "?"}`);
-    if (typeof fsm.subscribe === "function") fsm.subscribe(updateFsmBadge);
-    updateFsmBadge();
+    const fsmBadge = ui.text("FSM: ?").cls("ui-badge");
+    const updateFsmBadge = () => {
+      const name = fsm.current?.name ?? fsm.initial ?? "?";
+      fsmBadge.text(`FSM: ${name}`);
+    };
+    // fsm muss gestartet werden, sonst ist current null
+    fsm.start?.().then(updateFsmBadge).catch(() => updateFsmBadge());
 
     const fsmButtons = ui.hdiv().style({ gap: "8px", alignItems: "center", flexWrap: "wrap" }).add(
       fsmBadge,
-      ui.button("Start").on("click", () => { fsm.send("START"); updateFsmBadge(); log("FSM START"); }),
-      ui.button("Stop").on("click", () => { fsm.send("STOP"); updateFsmBadge(); log("FSM STOP"); }),
-      ui.button("Error").on("click", () => { fsm.send("ERROR"); updateFsmBadge(); log("FSM ERROR"); }),
-      ui.button("Reset").on("click", () => { fsm.send("RESET"); updateFsmBadge(); log("FSM RESET"); })
+      ui.button("Start").on("click", () => { fsm.send("START").then(updateFsmBadge); log("FSM START"); }),
+      ui.button("Stop").on("click", () => { fsm.send("STOP").then(updateFsmBadge); log("FSM STOP"); }),
+      ui.button("Error").on("click", () => { fsm.send("ERROR").then(updateFsmBadge); log("FSM ERROR"); }),
+      ui.button("Reset").on("click", () => { fsm.send("RESET").then(updateFsmBadge); log("FSM RESET"); })
     );
 
     header.add(
@@ -398,7 +414,7 @@
       // ansonsten nur Daten updaten (points geändert oder chart neu gesetzt)
       chartView?.setData(mapChart(st));
     }); 
-    
+
     chartCard.body.add(chartTop, chartBox);
 
     // Store -> UI
