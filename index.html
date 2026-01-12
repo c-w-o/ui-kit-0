@@ -192,6 +192,9 @@
     const btnDec = new Button("–");
     const btnInc = new Button("+");
     const btnRand = new Button("Randomize chart");
+    const renderCounter = () => counterText.text(`counter = ${store.get().counter}`);
+    store.subscribePath("counter", renderCounter);
+    renderCounter();
 
     btnDec.on("click", () => store.set({ counter: store.state.counter - 1 }));
     btnInc.on("click", () => store.set({ counter: store.state.counter + 1 }));
@@ -227,24 +230,6 @@
       });
       if (typeof controlsCard.own === "function") controlsCard.own(dispose);
     }
-
-    // Store -> UI
-    chart.bind(store, (state) => {
-      const pts = state.chart?.points ?? [];
-      return {
-        labels: pts.map(p => p.x),
-        datasets: [
-          { label: "Score", data: pts.map(p => p.y) }
-        ]
-      };
-    });
-    store.subscribePath("text", (v) => { if (textInput.el.value !== v) textInput.el.value = v; }, { immediate: true });
-    store.subscribePath("enabled", (v) => {
-      enabledToggle.el.checked = !!v;
-      btnDec.el.disabled = !v;
-      btnInc.el.disabled = !v;
-      log(`enabled => ${v}`);
-    }, { immediate: true });
 
     controlsCard.body.add(counterRow, textRow.add(textLabel, textInput), enabledRow, pillRow);
 
@@ -366,26 +351,64 @@
     const typeSelect = makeSelect(["bar", "line"], store.state.chart.type);
     typeSelect.on("change", (e) => store.set({ chart: { ...store.state.chart, type: e.target.value } }));
 
-    chartTop.add(new Text("Type:", { muted: true }), typeSelect, new HSpacer(), new Text("Store-bound via map(state)", { muted: true }));
+    chartTop.add(new Text("Type:", { muted: true }), typeSelect, new HSpacer(), new Text("Store-bound via chart subtree", { muted: true }));
 
-    const chart = new ChartView({
-      type: store.state.chart.type,
-      height: 280,
-      map: (state) => {
-        const pts = state.chart.points || [];
-        return {
-          labels: pts.map(p => p.x),
-          datasets: [
-            { label: "Score", data: pts.map(p => p.y) }
-          ]
-        };
+    const chartBox = ui.div().style({ height: "280px", overflow: "hidden" });
+    let chartView = null;
+
+    function mapChart(state) {
+      const pts = state.chart?.points ?? [];
+      return {
+        labels: pts.map(p => p.x),
+        datasets: [{ label: "Score", data: pts.map(p => p.y) }],
+      };
+    }
+
+    function rebuildChart() {
+      // alte Instanz sauber weg
+      if (chartView) chartView.destroy();
+
+      chartView = new ChartView({
+        type: store.get().chart.type,
+        height: 280,
+        map: (state) => mapChart(state),
+      });
+
+      // Chart in Box rendern (und nur einmal!)
+      chartBox.el.replaceChildren(chartView.el);
+
+      // Daten initial setzen
+      chartView.setData(mapChart(store.get()));
+    }
+
+    // initial
+    rebuildChart();
+
+    // WICHTIG: store.set({ chart: ... }) emittiert "chart" (nicht "chart.type"/"chart.points")
+    // Daher auf "chart" hören und intern unterscheiden.
+    let lastType = store.get().chart.type;
+    store.subscribePath("chart", () => {
+      const st = store.get();
+      if (st.chart?.type !== lastType) {
+        lastType = st.chart.type;
+        typeSelect.el.value = lastType; // Select synchron halten
+        rebuildChart();                 // Typ-Wechsel -> destroy + neu
+        return;
       }
-    });
+      // ansonsten nur Daten updaten (points geändert oder chart neu gesetzt)
+      chartView?.setData(mapChart(st));
+    }); 
+    
+    chartCard.body.add(chartTop, chartBox);
 
-    // Re-render on chart subtree changes
-    store.subscribePath("chart", () => chart.updateFrom(store.state), { immediate: true });
-
-    chartCard.body.add(chartTop, chart);
+    // Store -> UI
+    store.subscribePath("text", (v) => { if (textInput.el.value !== v) textInput.el.value = v; }, { immediate: true });
+    store.subscribePath("enabled", (v) => {
+      enabledToggle.el.checked = !!v;
+      btnDec.el.disabled = !v;
+      btnInc.el.disabled = !v;
+      log(`enabled => ${v}`);
+    }, { immediate: true });
 
     // -------------------------
     // Card: Editors demo (AJV + JSONEditor + Ace)
