@@ -1,11 +1,9 @@
 import { dom } from "./dom.js";
-import { ui } from "./ui.js";
+import { UINode } from "./ui.js";
 
-export class BaseElement {
+export class BaseElement extends UINode {
   constructor(tag = "div") {
-    this.el = ui.node(tag).el;
-    this._owned = [];
-    this._children = [];
+    super(document.createElement(tag));
   }
 
   appendTo(parent) {
@@ -52,12 +50,12 @@ export class BaseElement {
    *   this.on(otherEl, 'click', '.child', handler)
    */
   on(a, b, c, d, e) {
-    // overload: (evt, handler) or (evt, selector, handler)
     if (typeof a === "string") {
-      return this.own(dom.on(this.el, a, b, c, d));
+      this.own(dom.on(this.el, a, b, c, d)); 
+      return this;
     }
-    // full: (target, evt, ...)
-    return this.own(dom.on(a, b, c, d, e));
+    this.own(dom.on(a, b, c, d, e));
+    return this;
   }
 
   add(...children) {
