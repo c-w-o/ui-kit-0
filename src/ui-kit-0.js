@@ -159,6 +159,7 @@ export * from "./ui/rpc-ws.js";
 export * from "./ui/schema-config-editor.js";
 export * from "./ui/selection.js";
 export * from "./ui/store.js";
+export * from "./ui/svg-view.js";
 export * from "./ui/tabs.js";
 export * from "./ui/table.js";
 export * from "./ui/timer.js";

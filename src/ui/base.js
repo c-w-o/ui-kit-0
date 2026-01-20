@@ -59,7 +59,33 @@ export class BaseElement extends UINode {
   }
 
   add(...children) {
-    return this.addTo(this.el, ...children);
+    const flatChildren = children.flat(Infinity).filter(c => c);
+    
+    // Nur bei genau einem Kind: Logik für neues/existierendes Objekt
+    if (flatChildren.length === 1) {
+      const child = flatChildren[0];
+      const node = child.el ?? child;
+      const isNewChild = !node || node.parentNode !== this.el;
+      
+      if (isNewChild) {
+        this.el.appendChild(node);
+      } else {
+        this.el.appendChild(node);
+      }
+      
+      if (child?.destroy) this._children.push(child);
+      
+      // Neues Kind → das Kind zurückgeben, Existierendes → Parent
+      return isNewChild ? child : this;
+    }
+    
+    // Bei mehreren Kindern: immer Parent zurückgeben
+    for (const child of flatChildren) {
+      const node = child.el ?? child;
+      if (node && node.parentNode !== this.el) this.el.appendChild(node);
+      if (child?.destroy) this._children.push(child);
+    }
+    return this;
   }
 
   /**
@@ -88,5 +114,42 @@ export class BaseElement extends UINode {
     if (remove && this.el?.parentNode) {
       this.el.parentNode.removeChild(this.el);
     }
+  }
+}
+
+export class AppMain extends BaseElement {
+  static _instance = null;
+
+  constructor({ store, theme = "light", children = [], target = "#app" } = {}) {
+    // Singleton: return existing instance
+    if (AppMain._instance) {
+      return AppMain._instance;
+    }
+
+    super("div");
+    this.addClass("app-root");
+    // Apply theme to html element per CSS contract
+    document.documentElement.setAttribute("data-ui-theme", theme);
+    this._store = store;
+    this._theme = theme;
+    this._children = [];
+
+    children.forEach(child => this.add(child));
+    
+    // Mount into DOM
+    this.appendTo(target);
+    
+    // Register as singleton instance
+    AppMain._instance = this;
+  }
+
+  static getInstance() {
+    return AppMain._instance;
+  }
+
+  setTheme(theme) {
+    document.documentElement.setAttribute("data-ui-theme", theme);
+    this._theme = theme;
+    return this;
   }
 }

@@ -81,10 +81,12 @@ export class UINode {
 
   // --- events (disposer-aware)
   on(evt, handler, opts) {
-    return this.own(dom.on(this.el, evt, handler, opts));
+    this.own(dom.on(this.el, evt, handler, opts));
+    return this;
   }
   onSel(evt, selector, handler, opts) {
-    return this.own(dom.on(this.el, evt, selector, handler, opts));
+    this.own(dom.on(this.el, evt, selector, handler, opts));
+    return this;
   }
 
   // --- text helpers
