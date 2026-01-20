@@ -256,3 +256,23 @@ export class Pre extends BaseElement {
     this.setText(text);
   }
 }
+
+// --- HTML building blocks --------------------------------
+
+export class Span extends UIKText {
+  constructor(text = "", options = {}) {
+    super(text, { tag: "span", ...options });
+  }
+}
+
+export class Sup extends UIKText {
+  constructor(text = "", options = {}) {
+    super(text, { tag: "sup", ...options });
+  }
+}
+
+export class Sub extends UIKText {
+  constructor(text = "", options = {}) {
+    super(text, { tag: "sub", ...options });
+  }
+}

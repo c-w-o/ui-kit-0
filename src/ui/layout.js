@@ -10,10 +10,10 @@ export class Div extends BaseElement {
 }
 
 export class HDiv extends Div {
-  constructor({ gap = 12, wrap = true, align = "stretch", className = "", style = {} } = {}) {
+  constructor({ gap = 0, fill=false, wrap = true, align = "stretch", className = "", style = {} } = {}) {
     super({ className: `ui-hdiv ${className}`.trim(), style });
     this.initStyle({
-      display: "flex",
+      display: fill ? "flex" : "inline-flex",
       flexDirection: "row",
       flexWrap: wrap ? "wrap" : "nowrap",
       gap: typeof gap === "number" ? `${gap}px` : gap,
@@ -33,19 +33,41 @@ export class VDiv extends Div {
   }
 }
 
-// Spacer for flex layouts: consumes remaining space
+// Spacer for flex layouts: consumes remaining horizontal space (for HDiv/row contexts)
+// If gap is provided (e.g. "2ch", "1em"), creates a fixed-width spacer instead
 export class HSpacer extends Div {
-  constructor({ flex = 1 } = {}) {
+  constructor({ gap = null } = {}) {
     super({ className: "ui-hspacer" });
-    this.initStyle({ flex: String(flex), minWidth: "0" });
+    if (gap) {
+      // Fixed-width spacer
+      const width = typeof gap === "number" ? `${gap}px` : gap;
+      this.initStyle({ width });
+    } else {
+      // Flex spacer (consumes remaining space)
+      this.initStyle({ 
+        flex: "1 1 0",
+        width: "0"
+      });
+    }
   }
 }
 
-/* legacy grid helpers (optional, fine to keep) */
+/* Spacer for flex layouts: consumes remaining vertical space (for VDiv/column contexts)
+   If gap is provided (e.g. "2em"), creates a fixed-height spacer instead */
 export class VSpacer extends Div {
-  constructor({ flex = 1 } = {}) {
+  constructor({ gap = null } = {}) {
     super({ className: "ui-vspacer" });
-    this.initStyle({ flex: String(flex), minHeight: "0" });
+    if (gap) {
+      // Fixed-height spacer
+      const height = typeof gap === "number" ? `${gap}px` : gap;
+      this.initStyle({ height });
+    } else {
+      // Flex spacer (consumes remaining space)
+      this.initStyle({ 
+        flex: "1 1 0",
+        height: "0"
+      });
+    }
   }
 }
 

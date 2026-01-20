@@ -1,5 +1,5 @@
 
-export const UI_KIT_NAME = "ui-kit";
+export const UI_KIT_NAME = "ui-kit\\0";
 export const UI_KIT_MAJOR = 0;
 export const UI_KIT_MINOR = 7;
 export const UI_KIT_PATCH = 0;
@@ -166,7 +166,6 @@ export * from "./ui/timer.js";
 export * from "./ui/ui.js";
 export * from "./ui/validation.js";
 
-// src/ui-kit-0.js (am Ende)
 export const UI = {
   version: UI_KIT_VERSION,
 };
