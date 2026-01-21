@@ -196,6 +196,19 @@ export class Select extends BaseElement {
     return this;
   }
 
+  clearOptions() {
+    this.el.innerHTML = "";
+    return this;
+  }
+
+  addOption(label, value) {
+    const o = ui.option(label, value).el;
+    o.value = String(value);
+    o.textContent = String(label);
+    this.el.appendChild(o);
+    return this;
+  }
+
   getValue() { return this.el.value; }
 
   getTypedValue() { return this._parse(this.getValue()); }

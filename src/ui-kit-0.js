@@ -155,6 +155,7 @@ export * from "./ui/fsm.js";
 export * from "./ui/image.js";
 export * from "./ui/json-editor.js";
 export * from "./ui/layout.js";
+export * from "./ui/rpc-rest.js";
 export * from "./ui/rpc-ws.js";
 export * from "./ui/schema-config-editor.js";
 export * from "./ui/selection.js";
