@@ -45,6 +45,13 @@ export class SvgView extends BaseElement {
     return this;
   }
 
+  setSvgColor(color) {
+    if (!this._svgEl) return this;
+    this._svgEl.style.color = color;
+    // Alle fill/stroke Attribute die 'currentColor' verwenden, werden nun gefärbt
+    return this;
+  }
+
   /**
    * Set inline SVG from a string containing <svg ...>...</svg>
    * Trusted input only.
