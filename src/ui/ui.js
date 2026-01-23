@@ -189,7 +189,8 @@ export const ui = {
 export function bindText({ target, store, path, format = null, immediate = true }) {
   const el = dom.get(target) ?? target?.el ?? target;
   if (!el) throw new Error("bindText: target not found");
-  if (!store?.subscribePath) throw new Error("bindText: store.subscribePath missing");
+  store = store || (target && target._store ? target._store : null);
+  if (!store?.subscribePath) throw new Error("bindText: no store provided");
 
   const apply = (value) => {
     el.textContent = format ? format(value) : (value ?? "");
@@ -206,7 +207,8 @@ export function bindText({ target, store, path, format = null, immediate = true 
 export function bindValue({ target, store, path, event = "input", parse = null, format = null, immediate = true }) {
   const el = dom.get(target) ?? target?.el ?? target;
   if (!el) throw new Error("bindValue: target not found");
-  if (!store?.subscribePath) throw new Error("bindValue: store.subscribePath missing");
+  store = store || (target && target._store ? target._store : null);
+  if (!store?.subscribePath) throw new Error("bindValue: no store provided");
 
   const apply = (value) => {
     const v = format ? format(value) : value;

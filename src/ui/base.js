@@ -1,9 +1,11 @@
 import { dom } from "./dom.js";
+import { Store } from "./store.js";
 import { UINode } from "./ui.js";
 
 export class BaseElement extends UINode {
   constructor(tag = "div") {
     super(document.createElement(tag));
+    this._store = null;
   }
 
   appendTo(parent) {
@@ -75,6 +77,11 @@ export class BaseElement extends UINode {
       
       if (child?.destroy) this._children.push(child);
       
+      // Propagate store to child
+      if (child && typeof child === 'object' && child._store === null && this._store) {
+        child._store = this._store;
+      }
+      
       // Neues Kind → das Kind zurückgeben, Existierendes → Parent
       return isNewChild ? child : this;
     }
@@ -84,6 +91,10 @@ export class BaseElement extends UINode {
       const node = child.el ?? child;
       if (node && node.parentNode !== this.el) this.el.appendChild(node);
       if (child?.destroy) this._children.push(child);
+      // Propagate store to children
+      if (child && typeof child === 'object' && child._store === null && this._store) {
+        child._store = this._store;
+      }
     }
     return this;
   }
@@ -120,7 +131,7 @@ export class BaseElement extends UINode {
 export class AppMain extends BaseElement {
   static _instance = null;
 
-  constructor({ store, theme = "light", children = [], target = "#app" } = {}) {
+  constructor({ store = new Store(), theme = "light", children = [], target = "#app" } = {}) {
     // Singleton: return existing instance
     if (AppMain._instance) {
       return AppMain._instance;

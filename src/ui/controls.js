@@ -48,6 +48,8 @@ export class TextField extends BaseElement {
   
   // in TextField class:
   bind(store, path) {
+    store = store || this._store;
+    if (!store) throw new Error("TextField.bind: no store provided");
     // init
     this.el.value = store.getPath(path) ?? "";
   
@@ -139,6 +141,8 @@ export class Checkbox extends BaseElement {
   }
 
   bind(store, path) {
+    store = store || this._store;
+    if (!store) throw new Error("Checkbox.bind: no store provided");
     // init
     this.setValue(store.getPath(path) ?? false);
 
@@ -221,6 +225,8 @@ export class Select extends BaseElement {
   }
 
   bind(store, path) {
+    store = store || this._store;
+    if (!store) throw new Error("Select.bind: no store provided");
     // init (Store -> UI)
     this.setValue(store.getPath(path));
 
