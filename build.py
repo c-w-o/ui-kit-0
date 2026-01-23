@@ -83,7 +83,7 @@ def main():
         for fn in (out_dev, out_dev + ".map", out_min):
             shutil.copy2(built_dist / fn, dist_dir / fn)
     
-    src_files = ["sbom.json", "ui-kit-.theme.css", "ui-kit-0.css"]
+    src_files = ["sbom.json", "ui-kit-0.theme.css", "ui-kit-0.css"]
     for fn in src_files:
         src_src = build_root / "src" / fn
         if src_src.is_file():
