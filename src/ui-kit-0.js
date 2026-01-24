@@ -175,7 +175,7 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  * - JsonTextEditor      JSON editor (textarea-based)
  * - SchemaConfigEditor  Schema-based config editor (User/Expert tabs)
  *
- * Utilities (4 classes)
+ * Utilities (5 classes)
  * ---------------------
  * - Timer               Timer helper
  * - JsonRpcWebSocketClient  WebSocket JSON-RPC client
@@ -183,7 +183,7 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  * - State               FSM state
  * - StateMachine        State machine
  *
- * Total: 45+ classes available
+ * Total: 50+ classes available
  *
  *
  * ------------------------------------------------------------
