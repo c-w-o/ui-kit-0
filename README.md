@@ -1,9 +1,71 @@
-# ui-kit/0
+# ui-kit/0 (v0.7.0)
 
 ui-kit/0 is a small, explicit UI toolkit for browser-based applications.
 It is intended as a stable foundation for tools, dashboards, and configuration-oriented user interfaces.
 
 The project favors **clarity, predictability, and explicit structure** over abstraction depth or framework-level convenience.
+
+**Key Features:**
+- 50+ ready-to-use components (layouts, controls, charts, editors, dialogs)
+- Zero-build ES modules (direct browser execution)
+- No mandatory dependencies (core is fully standalone)
+- Explicit optional dependencies (JSON validation, editors, charts)
+- Real DOM (no virtual DOM, predictable behavior)
+- Store-driven state management with path-based access
+- Deterministic cleanup and lifecycle management
+- Graceful degradation when optional dependencies are missing
+
+---
+
+## Quick Start
+
+### Installation
+
+No build step or npm required. Simply load the framework in your HTML:
+
+```html
+<!-- CSS (fallback auto-injected if missing) -->
+<link rel="stylesheet" href="./src/ui-kit-0.theme.css" />
+<link rel="stylesheet" href="./src/ui-kit-0.css" />
+
+<!-- Optional: Third-party libraries (load BEFORE ui-kit-0.js) -->
+<script src="./src/third_party/ajv/ajv7.bundle.min.js"></script>
+<script src="./src/third_party/ace/ace.js"></script>
+<script src="./src/third_party/ace/mode-json.js"></script>
+<script src="./src/third_party/ace/worker-json.js"></script>
+<script src="./src/third_party/json-editor/jsoneditor.min.js"></script>
+<script src="./src/third_party/chartjs/chart.umd.min.js"></script>
+
+<!-- Required: Module -->
+<script type="module" src="./src/ui-kit-0.js"></script>
+```
+
+### Your First App
+
+```javascript
+import * as UI from "./src/ui-kit-0.js";
+
+const store = new UI.Store({ count: 0 });
+
+const app = new UI.VDiv({ gap: 12 })
+  .appendTo(document.getElementById("app"));
+
+new UI.Heading("Counter", { level: 1 }).appendTo(app);
+
+const display = new UI.Text("0").appendTo(app);
+
+new UI.Button("Increment", { variant: "primary" })
+  .appendTo(app)
+  .onClick(() => {
+    const v = store.getPath("count") + 1;
+    store.setPath("count", v);
+    display.setText(String(v));
+  });
+
+store.subscribePath("count", (v) => console.log("Count:", v));
+```
+
+For complete examples and API reference, see [API.md](./API.md).
 
 ---
 
@@ -221,45 +283,65 @@ Attempting to use them as such will work against the design.
 
 ---
 
-## Architectural Overview
+### Architectural Overview
 
 The project is structured into clearly separated layers, each with a specific responsibility.
 
 ---
 
-### Core Layer (No External Dependencies)
+#### Core Layer (No External Dependencies)
 
 The core layer is fully standalone and safe to use in any environment.
 
 It provides:
-- a minimal base component abstraction with lifecycle and cleanup handling
-- layout primitives (rows, columns, cards, spacers)
-- basic controls (buttons, text fields, checkboxes)
-- structural components (tabs, selection groups, tables)
-- a small, immutable, path-based state store
+- **Base Classes**: `UINode`, `BaseElement`, `Store`, `StateMachine`
+- **Layouts** (8): `Div`, `HDiv`, `VDiv`, `HSpacer`, `VSpacer`, `HGrid`, `VGrid`, `Card`
+- **Controls** (13): `Button`, `TextField`, `Checkbox`, `Select`, `Text`, `Heading`, `Label`, `Span`, `Sup`, `Sub`, `Pre`
+- **Structural** (3): `Tabs`, `SelectionGroup`, `TableView`
+- **Utilities**: `Timer`, `RestClient`
 
 Key characteristics:
 - zero third-party dependencies
 - explicit DOM manipulation
 - deterministic ownership and cleanup
 - predictable rendering behavior
+- fluent API with smart return values
 
 The core layer does not depend on any optional features.
 
 ---
 
-### Optional Feature Layer
+#### Optional Feature Layer
 
 More advanced functionality is implemented as optional modules.
 
-Examples include:
-- JSON Schema validation
-- schema-driven configuration editors
-- expert JSON editing
-- chart rendering
+**Requires AJV (JSON Schema validation):**
+- `validation.js` — Schema validation utilities
+- `schema-config-editor.js` — Professional JSON config editor with visual & expert modes
 
-These features rely on explicitly loaded third-party libraries
-(e.g. AJV, json-editor, Ace, Chart.js).
+**Requires Chart.js:**
+- `chart.js` — ChartView, ChartCard, LineChartCard, BarChartCard, PieChartCard
+
+**Requires json-editor:**
+- `schema-config-editor.js` — Visual form mode (User tab)
+
+**Requires Ace Editor:**
+- `schema-config-editor.js` — Expert JSON mode (Expert tab)
+
+**RPC & REST:**
+- `rpc-rest.js` — HTTP REST client with fetch wrapper
+- `rpc-ws.js` — JSON-RPC over WebSocket with auto-reconnect
+
+**Editors:**
+- `json-editor.js` — Simple JSON textarea editor
+
+**Dialogs:**
+- `dialog-stack.js` — Modal/dialog stack management
+
+**Other:**
+- `image.js` — ImageView for raster and inline SVG
+- `svg-view.js` — SVG container for drawing
+- `ui.js` — Utility functions and binding helpers
 
 If a dependency is missing:
 - the affected feature reports its unavailability
@@ -268,7 +350,7 @@ If a dependency is missing:
 
 ---
 
-### Styling Layer
+#### Styling Layer
 
 Styling is separated from logic and driven by CSS custom properties.
 
@@ -277,6 +359,42 @@ Styling is separated from logic and driven by CSS custom properties.
 - Themes are applied by overriding tokens, not by modifying component logic
 
 A minimal fallback stylesheet exists to keep components usable if the main CSS is missing.
+
+---
+
+## Component Overview
+
+### Layouts (8)
+`Div`, `HDiv`, `VDiv`, `HSpacer`, `VSpacer`, `HGrid`, `VGrid`, `Card`
+
+### Controls (13)
+`Button`, `TextField`, `Checkbox`, `Select`, `Text`, `Heading`, `Label`, `Span`, `Sup`, `Sub`, `Pre`, `UIKText`, `Input`
+
+### Structural (3)
+`Tabs`, `SelectionGroup`, `TableView`
+
+### Charts (5)
+`ChartView`, `ChartCard`, `LineChartCard`, `BarChartCard`, `PieChartCard`
+
+### Editors (2)
+`JsonTextEditor`, `SchemaConfigEditor`
+
+### Dialogs & Modals (2)
+`DialogStack`, `ModalDialog`
+
+### Images & SVG (2)
+`ImageView`, `SvgView`
+
+### RPC & REST (2)
+`RestClient`, `JsonRpcWebSocketClient`
+
+### State & FSM (3)
+`Store`, `StateMachine`, `State`
+
+### Utilities (4)
+`Timer`, `BaseElement`, `AppMain`, `EventRegistry`
+
+**Total: 50+ components**
 
 ---
 
@@ -307,26 +425,35 @@ This makes deployments reproducible and easy to audit.
 
 ---
 
-## Documentation Layout
+## Documentation
 
-Documentation is intentionally split into separate concerns:
+The project provides separate documentation for different aspects:
 
-1. **Project Overview (this document)**  
-   Philosophy, goals, and architecture
+1. **README.md** (this file)  
+   Philosophy, design goals, and architectural overview
 
-2. **API Documentation**  
-   Detailed reference for components, classes, and usage patterns
+2. **[API.md](./API.md)**  
+   Complete API reference with examples for all 50+ components
 
-3. **Styling and Theming Guide**  
-   Design tokens, themes, and customization rules
+3. **[Styling.md](./Styling.md)** (if available)  
+   Design tokens, themes, and CSS customization
 
-Each document focuses on a single aspect and avoids mixing conceptual and reference material.
+Start with [API.md](./API.md) for practical examples and detailed component documentation.
 
 ---
 
-## License
+## License and Attribution
 
 ui-kit/0 is released under the MIT License.  
 Third-party libraries retain their respective licenses.
 
-See the included SBOM for exact versions and license details.
+See [sbom.json](./src/sbom.json) for exact versions, hashes, and license details of all dependencies.
+
+---
+
+## Maintenance and Support
+
+This is a stable, single-author project focused on long-term usability.
+
+The framework is designed to remain understandable and maintainable without constant updates.
+Updates are made conservatively to preserve backward compatibility.

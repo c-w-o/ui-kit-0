@@ -97,6 +97,10 @@ export class Store {
       this._batchedPaths.add(path);
       return;
     }
+    this._doEmit(path);
+  }
+
+  _doEmit(path) {
     // Global listeners: receive (state, changedPath)
     for (const fn of this.listeners) fn(this.state, path);
 
@@ -106,5 +110,39 @@ export class Store {
 
     const star = this.pathListeners.get("*");
     if (star) for (const fn of star) fn(undefined, this.state, path);
+  }
+
+  /**
+   * Transactional update with automatic rollback on error.
+   * Useful for multi-step updates that must all succeed or all fail.
+   * 
+   * @param {Function} fn - Update function
+   * @param {Function|null} validate - Optional validation function
+   */
+  transaction(fn, validate = null) {
+    const snapshot = clone(this.state);
+    this._batchDepth++;
+    
+    try {
+      fn();
+      
+      // Optional validation
+      if (validate && !validate(this.state)) {
+        throw new Error("Transaction validation failed");
+      }
+    } catch (err) {
+      // Rollback on error
+      this.state = snapshot;
+      this._batchedPaths.clear();
+      throw err;
+    } finally {
+      this._batchDepth--;
+      if (this._batchDepth === 0 && this._batchedPaths.size) {
+        const paths = Array.from(this._batchedPaths);
+        this._batchedPaths.clear();
+        // Emit each changed path individually (preserves granularity)
+        for (const p of paths) this._doEmit(p);
+      }
+    }
   }
 }

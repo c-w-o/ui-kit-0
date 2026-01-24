@@ -114,7 +114,7 @@ export class BaseElement extends UINode {
     return this;
   }
 
-  destroy({ remove = false } = {}) {
+  destroy({ remove = true } = {}) {
     for (const ch of this._children.splice(0)) {
       try { ch.destroy({ remove: true }); } catch {}
     }

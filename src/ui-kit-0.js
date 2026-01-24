@@ -1,5 +1,5 @@
 
-export const UI_KIT_NAME = "ui-kit\\0";
+export const UI_KIT_NAME = "ui-kit/0";
 export const UI_KIT_MAJOR = 0;
 export const UI_KIT_MINOR = 7;
 export const UI_KIT_PATCH = 0;
@@ -212,7 +212,7 @@ function ensureUiCss() {
   style.textContent = FALLBACK_CSS;
   document.head.appendChild(style);
 
-  console.warn("[ui-kit\\0] CSS not loaded → fallback CSS applied");
+  console.warn("[ui-kit/0] CSS not loaded → fallback CSS applied");
 }
 
 ensureUiCss();
