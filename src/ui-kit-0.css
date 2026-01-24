@@ -188,6 +188,37 @@ body {
 }
 
 
+/* ---- Navigation Buttons (Tabs/Menu) ---- */
+
+.ui-nav-btn {
+  min-height: var(--ui-control-height);
+  padding: var(--ui-control-padding-y) var(--ui-control-padding-x);
+  border-radius: var(--ui-radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ui-color-text);
+  cursor: pointer;
+  transition: background-color var(--ui-duration-fast) var(--ui-ease);
+}
+
+.ui-nav-btn:hover {
+  background-color: var(--ui-color-surface-muted);
+}
+
+.ui-nav-btn.active {
+  background-color: var(--ui-color-nav-active);
+  color: #fff;
+}
+
+.ui-nav-btn.active:hover {
+  background-color: var(--ui-color-nav-active-hover);
+}
+
+.ui-nav-btn.active:focus-visible {
+  box-shadow: var(--ui-focus-ring);
+}
+
+
 /* ------------------------------------------------------
    5) Tabs
    ------------------------------------------------------ */

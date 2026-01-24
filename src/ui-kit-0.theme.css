@@ -47,6 +47,9 @@
   --ui-color-accent: #2563eb;
   --ui-color-accent-hover: #1e4fd6;
 
+  --ui-color-nav-active: #2563eb;
+  --ui-color-nav-active-hover: #1e4fd6;
+
   --ui-color-danger: #b00020;
   --ui-color-danger-bg: #fdecea;
 
@@ -81,6 +84,9 @@
   --ui-color-accent: #60a5fa;
   --ui-color-accent-hover: #3b82f6;
 
+  --ui-color-nav-active: #60a5fa;
+  --ui-color-nav-active-hover: #3b82f6;
+
   --ui-color-danger: #ff6b6b;
   --ui-color-danger-bg: rgba(255,107,107,0.14);
 
@@ -101,6 +107,8 @@
     --ui-color-text-muted: rgba(255,255,255,0.65);
     --ui-color-accent: #60a5fa;
     --ui-color-accent-hover: #3b82f6;
+    --ui-color-nav-active: #60a5fa;
+    --ui-color-nav-active-hover: #3b82f6;
     --ui-color-danger: #ff6b6b;
     --ui-color-danger-bg: rgba(255,107,107,0.14);
     --ui-color-ok: #2dd4bf;
