@@ -13,6 +13,8 @@ export class Tabs extends BaseElement {
     this.tabs = []; // {id, title, panel, factory, built}
 
     this.onChangeCb = null;
+    this.onBeforeChange = null;
+    this.onAfterChange = null;
 
     // Button-based selection (tab bar)
     this.group = new SelectionGroup({
@@ -24,11 +26,25 @@ export class Tabs extends BaseElement {
     // ARIA: a tablist
     this.group.bar.el.setAttribute("role", "tablist");
 
-    this.group.onChange((id) => {
+    this.group.onChange(async (id) => {
+      // Before-change hook (can prevent change)
+      if (this.onBeforeChange) {
+        const allow = await this.onBeforeChange(id, this.active);
+        if (allow === false) {
+          // Revert selection
+          this.group.setActive(this.active);
+          this._syncDropdown();
+          return;
+        }
+      }
+      const oldId = this.active;
       this.active = id;
       this._applyActive();
       this.onChangeCb?.(id);
       this._syncDropdown();
+      if (this.onAfterChange) {
+        await this.onAfterChange(id, oldId);
+      }
     });
 
     // Dropdown (responsive fallback)
@@ -47,12 +63,22 @@ export class Tabs extends BaseElement {
     this.add(this.panels);                // instead of appendChild(this.panels.el)
 
   }
-  
+
   destroy(opts = { remove: true }) {
     super.destroy(opts);
   }
   onChange(fn) {
     this.onChangeCb = fn;
+    return this;
+  }
+
+  beforeChange(fn) {
+    this.onBeforeChange = fn;
+    return this;
+  }
+
+  afterChange(fn) {
+    this.onAfterChange = fn;
     return this;
   }
 
@@ -89,10 +115,19 @@ export class Tabs extends BaseElement {
     return this;
   }
 
-  setActive(id) {
+  async setActive(id) {
+    // Before-change hook (can prevent change)
+    if (this.onBeforeChange) {
+      const allow = await this.onBeforeChange(id, this.active);
+      if (allow === false) return this;
+    }
+    const oldId = this.active;
     this.active = id;
     this.group.setActive(id, { focus: true });
     // group.onChange will call _applyActive + sync dropdown
+    if (this.onAfterChange) {
+      await this.onAfterChange(id, oldId);
+    }
     return this;
   }
 

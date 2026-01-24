@@ -27,12 +27,14 @@ export class Button extends BaseElement {
 }
 
 export class TextField extends BaseElement {
-  constructor(value = "", { type = "text", placeholder = "" } = {}) {
+  constructor(value = "", { type = "text", placeholder = "", validator = null } = {}) {
     super("input");
     this.el.type = type;
     this.el.value = value ?? "";
     this.el.placeholder = placeholder;
     this.el.classList.add("ui-input");
+    this._validator = validator;
+    this._errorMsg = null;
   }
 
   getValue() { return this.el.value; }
@@ -45,17 +47,41 @@ export class TextField extends BaseElement {
     this.el.classList.toggle("invalid", !!invalid);
     return this;
   }
-  
-  // in TextField class:
-  bind(store, path) {
+
+  validate() {
+    if (!this._validator) return { valid: true };
+    const result = this._validator(this.getValue());
+    this.setInvalid(!result.valid);
+    this._errorMsg = result.error || null;
+    return result;
+  }
+
+  getErrorMessage() {
+    return this._errorMsg;
+  }
+
+  /**
+   * Bind to store with optional validation on input.
+   * @param {Store} store
+   * @param {string} path
+   * @param {object} opts { validateOnChange: boolean }
+   */
+  bind(store, path, { validateOnChange = false } = {}) {
     store = store || this._store;
     if (!store) throw new Error("TextField.bind: no store provided");
     // init
     this.el.value = store.getPath(path) ?? "";
-  
+
     // UI -> Store
-    this.on("input", () => store.setPath(path, this.getValue()));
-  
+    this.on("input", () => {
+      const value = this.getValue();
+      if (validateOnChange && this._validator) {
+        const result = this.validate();
+        if (!result.valid) return; // Don't update store with invalid value
+      }
+      store.setPath(path, value);
+    });
+
     // Store -> UI
     this.own(store.subscribePath(path, (val) => this.setValue(val)));
 

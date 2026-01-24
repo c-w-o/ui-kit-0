@@ -1,5 +1,3 @@
-// src/ui/store.js
-
 function clone(x) {
   if (typeof structuredClone === "function") return structuredClone(x);
   // Fallback: reicht für plain JSON-Daten (Objekte/Arrays/Numbers/Strings/Bools)
@@ -11,9 +9,34 @@ export class Store {
     this.state = clone(initial);
     this.listeners = new Set();     // global listeners
     this.pathListeners = new Map(); // path -> Set(fn)
-
-     this._batchDepth = 0;
+    this._batchDepth = 0;
     this._batchedPaths = new Set();
+    this._computed = new Map();
+  }
+  /**
+   * Define a computed property that auto-updates when dependencies change
+   * @param {string} path - Path where computed value is stored
+   * @param {string[]} deps - Paths to watch
+   * @param {Function} fn - Compute function receiving dependency values
+   */
+  defineComputed(path, deps, fn) {
+    this._computed.set(path, { deps, fn });
+    // Subscribe to all dependencies
+    for (const dep of deps) {
+      this.subscribePath(dep, () => this._updateComputed(path));
+    }
+    // Initial computation
+    this._updateComputed(path);
+    return this;
+  }
+
+  _updateComputed(path) {
+    const computed = this._computed.get(path);
+    if (!computed) return;
+    const depValues = computed.deps.map(d => this.getPath(d));
+    const value = computed.fn(...depValues);
+    // Set without triggering computed recursion
+    this.setPath(path, value);
   }
 
   get() {

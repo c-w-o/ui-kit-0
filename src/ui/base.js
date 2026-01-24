@@ -42,6 +42,37 @@ export class BaseElement extends UINode {
   show() { this.el.style.display = ""; return this; }
   hide() { this.el.style.display = "none"; return this; }
 
+  setAttr(name, value) {
+    this.el.setAttribute(name, value);
+    return this;
+  }
+
+  removeAttr(name) {
+    this.el.removeAttribute(name);
+    return this;
+  }
+
+  toggleClass(cls, force) {
+    this.el.classList.toggle(cls, force);
+    return this;
+  }
+
+  removeClass(cls) {
+    this.el.classList.remove(cls);
+    return this;
+  }
+
+  setId(id) {
+    this.el.id = id;
+    return this;
+  }
+
+  setAria(role, label = null) {
+    if (role) this.el.setAttribute("role", role);
+    if (label) this.el.setAttribute("aria-label", label);
+    return this;
+  }
+
   /**
    * Event binding with automatic cleanup.
    *
