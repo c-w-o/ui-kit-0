@@ -110,3 +110,5 @@ export class TableView extends BaseElement {
     }
   }
 }
+
+export { TableView as Table };

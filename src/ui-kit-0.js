@@ -116,6 +116,77 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  *
  *
  * ------------------------------------------------------------
+ * AVAILABLE WIDGETS & COMPONENTS
+ * ------------------------------------------------------------
+ *
+ * Core/Base (5 classes)
+ * ----------------------
+ * - UINode              Base class for UI elements
+ * - BaseElement         Extended base with event handling & lifecycle
+ * - AppMain             Main app container (singleton)
+ * - EventRegistry       Event registration helper
+ * - Store               State management
+ *
+ * Layout (8 classes)
+ * ------------------
+ * - Div                 Generic container
+ * - HDiv                Horizontal flex layout
+ * - VDiv                Vertical flex layout
+ * - HSpacer             Horizontal spacer
+ * - VSpacer             Vertical spacer
+ * - HGrid               Horizontal grid
+ * - VGrid               Vertical grid
+ * - Card                Card container with header/body
+ *
+ * Controls (13 classes)
+ * ---------------------
+ * - Button              Button element
+ * - TextField/Input     Text input field
+ * - Checkbox            Checkbox/switch control
+ * - Select              Dropdown select
+ * - UIKText/Text        Text container
+ * - Label               Label element
+ * - Heading             Heading (h1-h6)
+ * - Pre                 Preformatted text
+ * - Span                Inline text
+ * - Sup                 Superscript
+ * - Sub                 Subscript
+ *
+ * Complex Widgets (11 classes)
+ * ----------------------------
+ * - TableView/Table     Table view
+ * - Tabs                Tab navigation
+ * - SelectionGroup      Button-based selection
+ * - ChartView           Chart.js wrapper
+ * - ChartCard           Chart in card
+ * - LineChartCard       Line chart card
+ * - BarChartCard        Bar chart card
+ * - PieChartCard        Pie chart card
+ * - SvgView             SVG display
+ * - ImageView           Image display
+ *
+ * Dialogs & Modals (2 classes)
+ * ----------------------------
+ * - DialogStack         Modal stack manager
+ * - ModalDialog         Modal dialog
+ *
+ * Editors (2 classes)
+ * -------------------
+ * - JsonTextEditor      JSON editor (textarea-based)
+ * - SchemaConfigEditor  Schema-based config editor (User/Expert tabs)
+ *
+ * Utilities (4 classes)
+ * ---------------------
+ * - Timer               Timer helper
+ * - JsonRpcWebSocketClient  WebSocket JSON-RPC client
+ * - RestClient          REST API client
+ * - State               FSM state
+ * - StateMachine        State machine
+ *
+ * Total: 45+ classes available
+ *
+ *
+ * ------------------------------------------------------------
  * THIRD-PARTY LICENSES
  * ------------------------------------------------------------
  *
@@ -141,7 +212,7 @@ function ensureUiCss() {
   style.textContent = FALLBACK_CSS;
   document.head.appendChild(style);
 
-  console.warn("[ui-kit] CSS not loaded → fallback CSS applied");
+  console.warn("[ui-kit\\0] CSS not loaded → fallback CSS applied");
 }
 
 ensureUiCss();

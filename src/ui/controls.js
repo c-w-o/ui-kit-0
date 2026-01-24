@@ -252,6 +252,7 @@ export class UIKText extends BaseElement {
   }
 }
 export { UIKText as Text };
+export { TextField as Input };
 
 export class Label extends UIKText {
   constructor(text = "") {
