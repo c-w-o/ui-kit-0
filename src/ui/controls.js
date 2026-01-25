@@ -280,6 +280,146 @@ export class UIKText extends BaseElement {
 export { UIKText as Text };
 export { TextField as Input };
 
+export class TextArea extends BaseElement {
+  constructor(value = "", { placeholder = "", rows = 3 } = {}) {
+    super("textarea");
+    this.el.value = value ?? "";
+    this.el.placeholder = placeholder;
+    this.el.rows = rows;
+    this.el.classList.add("ui-input");
+  }
+
+  getValue() { return this.el.value; }
+  setValue(v) { this.el.value = v ?? ""; return this; }
+  setPlaceholder(p) { this.el.placeholder = p ?? ""; return this; }
+  clear() { this.el.value = ""; return this; }
+}
+
+export class RadioGroup extends BaseElement {
+  constructor({ name = "radio-group", options = [], selected = null, layout = "grid" } = {}) {
+    super("div");
+    this.el.classList.add("ui-radio-group");
+    this._name = name || `radio-${Date.now()}`;
+    this._options = [];
+    this._selected = selected;
+    
+    // Setup layout
+    if (layout === "grid") {
+      this.setStyle({
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: "12px"
+      });
+    } else if (layout === "vertical") {
+      this.setStyle({ display: "flex", flexDirection: "column", gap: "8px" });
+    } else if (layout === "horizontal") {
+      this.setStyle({ display: "flex", flexDirection: "row", gap: "12px", flexWrap: "wrap" });
+    }
+    
+    // Add options
+    if (options && options.length > 0) {
+      for (const opt of options) {
+        this.addOption(typeof opt === "string" ? { value: opt, label: opt } : opt);
+      }
+    }
+  }
+  
+  addOption({ value, label = null, checked = false }) {
+    const optLabel = label || value;
+    const isChecked = checked || value === this._selected;
+    
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = this._name;
+    radio.value = value;
+    radio.checked = isChecked;
+    
+    const labelSpan = document.createElement("span");
+    labelSpan.textContent = optLabel;
+    labelSpan.style.marginLeft = "8px";
+    labelSpan.style.cursor = "pointer";
+    labelSpan.style.userSelect = "none";
+    
+    const container = document.createElement("div");
+    container.style.padding = "8px 12px";
+    container.style.border = "1px solid var(--ui-color-border)";
+    container.style.borderRadius = "var(--ui-radius-sm, 4px)";
+    container.style.display = "flex";
+    container.style.alignItems = "center";
+    // Background wird später in setValue() gesetzt
+    container.style.background = isChecked ? "var(--ui-color-nav-active, rgba(100,150,255,0.1))" : "";
+    container.style.cursor = "pointer";
+    
+    container.appendChild(radio);
+    container.appendChild(labelSpan);
+    
+    // Click handlers
+    radio.addEventListener("change", (evt) => {
+      if (radio.checked) {
+        this._selected = radio.value;
+        // Update all containers in group
+        const allContainers = this.el.querySelectorAll("div");
+        for (const c of allContainers) {
+          const r = c.querySelector("input[type=radio]");
+          if (r) {
+            c.style.background = r.checked ? "var(--ui-color-nav-active, rgba(100,150,255,0.1))" : "";
+          }
+        }
+        this.el.dispatchEvent(new CustomEvent("change", { detail: { value: radio.value }, bubbles: true }));
+      }
+    });
+    
+    labelSpan.addEventListener("click", () => {
+      radio.checked = true;
+      radio.dispatchEvent(new Event("change"));
+    });
+    
+    this.el.appendChild(container);
+    this._options.push({ value, label: optLabel, radio, container });
+    
+    return this;
+  }
+  
+  getValue() {
+    return this._selected;
+  }
+  
+  setValue(value) {
+    console.log("[RadioGroup.setValue]", "Setting value to:", value, "Available options:", this._options.map(o => o.value));
+    const option = this._options.find(opt => opt.value === value);
+    console.log("[RadioGroup.setValue]", "Found option:", option);
+    if (option) {
+      // Uncheck all radios first
+      for (const opt of this._options) {
+        opt.radio.checked = false;
+      }
+      // Check the selected one
+      this._selected = value;
+      option.radio.checked = true;
+      
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        // Update all container backgrounds
+        for (const opt of this._options) {
+          const isChecked = opt.radio.checked;
+          console.log("[RadioGroup.setValue] RAF", "Updating", opt.value, "checked:", isChecked, "radio.checked:", opt.radio.checked);
+          opt.container.style.background = isChecked ? "var(--ui-color-nav-active, rgba(100,150,255,0.1))" : "";
+        }
+      });
+      
+      console.log("[RadioGroup.setValue]", "Dispatching change event for value:", value);
+      option.radio.dispatchEvent(new Event("change", { bubbles: true }));
+    } else {
+      console.log("[RadioGroup.setValue]", "Option not found for value:", value);
+    }
+    return this;
+  }
+  
+  onChange(fn) {
+    return this.on("change", fn);
+  }
+}
+
 export class Label extends UIKText {
   constructor(text = "") {
     super(text, { tag: "div", className: "ui-label" });

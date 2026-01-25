@@ -158,6 +158,8 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  * ---------------------
  * - Button              Button element
  * - TextField/Input     Text input field
+ * - TextArea            Multiline text input
+ * - RadioGroup          Radio button group with auto-management
  * - Checkbox            Checkbox/switch control
  * - Select              Dropdown select
  * - UIKText/Text        Text container
@@ -167,6 +169,7 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  * - Span                Inline text
  * - Sup                 Superscript
  * - Sub                 Subscript
+ * - Link                Hyperlink element
  *
  * Complex Widgets (11 classes)
  * ----------------------------
