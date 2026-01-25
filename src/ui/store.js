@@ -1,7 +1,27 @@
+const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+
+function isForbiddenKey(key) {
+  return FORBIDDEN_KEYS.has(key);
+}
+
+function sanitizeObject(value) {
+  if (Array.isArray(value)) return value.map(sanitizeObject);
+  if (value && typeof value === "object") {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (isForbiddenKey(k)) continue;
+      out[k] = sanitizeObject(v);
+    }
+    return out;
+  }
+  return value;
+}
+
 function clone(x) {
-  if (typeof structuredClone === "function") return structuredClone(x);
-  // Fallback: reicht für plain JSON-Daten (Objekte/Arrays/Numbers/Strings/Bools)
-  return JSON.parse(JSON.stringify(x));
+  let copy;
+  if (typeof structuredClone === "function") copy = structuredClone(x);
+  else copy = JSON.parse(JSON.stringify(x));
+  return sanitizeObject(copy);
 }
   
 export class Store {
@@ -66,10 +86,13 @@ export class Store {
     let cur = newState;
     for (let i = 0; i < parts.length - 1; i++) {
       const k = parts[i];
+      if (isForbiddenKey(k)) throw new Error(`Store.setPath: forbidden key "${k}"`);
       if (typeof cur[k] !== "object" || cur[k] === null) cur[k] = {};
       cur = cur[k];
     }
-    cur[parts[parts.length - 1]] = value;
+    const leaf = parts[parts.length - 1];
+    if (isForbiddenKey(leaf)) throw new Error(`Store.setPath: forbidden key "${leaf}"`);
+    cur[leaf] = value;
 
     this.state = newState;
     this._emit(path);
