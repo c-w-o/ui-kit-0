@@ -322,3 +322,29 @@ export class Sub extends UIKText {
     super(text, { tag: "sub", ...options });
   }
 }
+
+export class Link extends BaseElement {
+  constructor(text = "", href = "#", { target = "_blank", title = "" } = {}) {
+    super("a");
+    this.el.href = href;
+    this.el.target = target;
+    if (title) this.el.title = title;
+    this.setText(text);
+    this.el.classList.add("ui-link");
+  }
+
+  setHref(href) {
+    this.el.href = href;
+    return this;
+  }
+
+  setTarget(target = "_blank") {
+    this.el.target = target;
+    return this;
+  }
+
+  setTitle(title) {
+    this.el.title = title;
+    return this;
+  }
+}
