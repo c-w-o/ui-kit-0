@@ -3,9 +3,9 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "ui-kit-0",
-  "documentNamespace": "urn:uuid:REPLACE-ME",
+  "documentNamespace": "urn:uuid:c5e92a5e-6f0d-55d5-a8c7-f2d3b8e9a1c2",
   "creationInfo": {
-    "created": "2025-12-25T00:00:00Z",
+    "created": "2026-01-25T00:00:00Z",
     "creators": [
       "Person: c-w-o"
     ],
@@ -18,7 +18,7 @@
     {
       "SPDXID": "SPDXRef-Package-UI-KIT",
       "name": "ui-kit/0",
-      "versionInfo": "0.6.2",
+      "versionInfo": "0.7.0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseDeclared": "MIT",
@@ -31,7 +31,7 @@
       "versionInfo": "4.5.1",
       "downloadLocation": "NOASSERTION",
       "homepage": "https://github.com/chartjs/Chart.js/releases/tag/v4.5.1",
-      "filesAnalyzed": true,
+      "filesAnalyzed": false,
       "licenseDeclared": "MIT",
       "licenseConcluded": "MIT",
       "externalRefs": [
@@ -48,7 +48,7 @@
       "versionInfo": "8.17.1",
       "downloadLocation": "NOASSERTION",
       "homepage": "https://ajv.js.org/",
-      "filesAnalyzed": true,
+      "filesAnalyzed": false,
       "licenseDeclared": "MIT",
       "licenseConcluded": "MIT",
       "externalRefs": [
@@ -66,7 +66,7 @@
       "versionInfo": "2.15.2",
       "downloadLocation": "NOASSERTION",
       "homepage": "https://github.com/json-editor/json-editor",
-      "filesAnalyzed": true,
+      "filesAnalyzed": false,
       "licenseDeclared": "MIT",
       "licenseConcluded": "MIT",
       "externalRefs": [
@@ -84,67 +84,35 @@
       "versionInfo": "1.43.5",
       "downloadLocation": "NOASSERTION",
       "homepage": "https://github.com/ajaxorg/ace-builds",
-      "filesAnalyzed": true,
+      "filesAnalyzed": false,
       "licenseDeclared": "BSD-3-Clause",
       "licenseConcluded": "BSD-3-Clause",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/ace-builds@1.43.5"
+        }
+      ],
       "sourceInfo": "src-min-noconflict: ace.js, mode-json.js, worker-json.js"
-    }
-  ],
-  "files": [
-    {
-      "SPDXID": "SPDXRef-File-ajv7",
-      "fileName": "third_party/ajv/ajv7.bundle.min.js",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "e0f02be09e139e77151a75480afae5e15001cff3ab1ee96c22b9d6904eaab726"
-        }
-      ],
-      "licenseConcluded": "MIT"
     },
     {
-      "SPDXID": "SPDXRef-File-jsoneditor",
-      "fileName": "third_party/json-editor/jsoneditor.min.js",
-      "checksums": [
+      "SPDXID": "SPDXRef-Package-DOMPurify",
+      "name": "dompurify",
+      "versionInfo": "3.0.9",
+      "downloadLocation": "NOASSERTION",
+      "homepage": "https://github.com/cure53/DOMPurify",
+      "filesAnalyzed": false,
+      "licenseDeclared": "Apache-2.0 OR MPL-2.0",
+      "licenseConcluded": "Apache-2.0 OR MPL-2.0",
+      "externalRefs": [
         {
-          "algorithm": "SHA256",
-          "checksumValue": "a468c9cab58a59d5110b32f21cf484e945a07d42a2d0f7985769aaf14d091d00"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/dompurify@3.0.9"
         }
       ],
-      "licenseConcluded": "MIT"
-    },
-    {
-      "SPDXID": "SPDXRef-File-ace-core",
-      "fileName": "third_party/ace/ace.js",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "28fe7d2af301ef6f529464e2dcfc5fbbde47accbc4da63e801127d624ac6b336"
-        }
-      ],
-      "licenseConcluded": "BSD-3-Clause"
-    },
-    {
-      "SPDXID": "SPDXRef-File-ace-mode-json",
-      "fileName": "third_party/ace/mode-json.js",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "010feab73fd75cfcdee30cdc71bdcc868e4f914465a59a7141c5ee4983a8afec"
-        }
-      ],
-      "licenseConcluded": "BSD-3-Clause"
-    },
-    {
-      "SPDXID": "SPDXRef-File-ace-worker-json",
-      "fileName": "third_party/ace/worker-json.js",
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "15a9597d26ce8252d020e518529ac5a844eb963a28aac1b03394decbbbe16f1b"
-        }
-      ],
-      "licenseConcluded": "BSD-3-Clause"
+      "sourceInfo": "origin: https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/"
     }
   ],
   "relationships": [
@@ -174,29 +142,9 @@
       "relatedSpdxElement": "SPDXRef-Package-Ace"
     },
     {
-      "spdxElementId": "SPDXRef-Package-Ajv",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-ajv7"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-JsonEditor",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-jsoneditor"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-Ace",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-ace-core"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-Ace",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-ace-mode-json"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-Ace",
-      "relationshipType": "CONTAINS",
-      "relatedSpdxElement": "SPDXRef-File-ace-worker-json"
+      "spdxElementId": "SPDXRef-Package-UI-KIT",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-DOMPurify"
     }
   ]
 }

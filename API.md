@@ -30,6 +30,9 @@ ui-kit/0 is a minimalist, zero-build UI framework for modern browsers.
 <!-- Optional: Chart.js for charts -->
 <script src="./src/third_party/chartjs/chart.umd.min.js"></script>
 
+<!-- Optional: DOMPurify for HTML/SVG sanitization -->
+<script src="./src/third_party/dompurify/purify.min.js"></script>
+
 <!-- Required: CSS (fallback injected if missing) -->
 <link rel="stylesheet" href="./src/ui-kit-0.theme.css" />
 <link rel="stylesheet" href="./src/ui-kit-0.css" />
@@ -451,6 +454,12 @@ new UI.PieChartCard({ title: "Breakdown" })
 
 ## 8. Images & SVG
 
+**Security & Sanitization**
+
+- `SvgView.setSvg()` always sanitizes SVG input using DOMPurify to mitigate XSS. There is currently no opt-out.
+- `ImageView` when used with inline SVG should only receive trusted input; prefer `SvgView` for untrusted SVG.
+
+
 ### ImageView
 
 Display raster images and inline SVG.
@@ -526,6 +535,13 @@ new UI.SchemaConfigEditor({
 ---
 
 ## 10. Dialogs & Modals
+
+## 10.5 Sanitization Defaults (HTML/SVG)
+
+- `dom.setHtml(target, html, { sanitize = true, customConfig })` sanitizes HTML by default via DOMPurify. Disable per call with `{ sanitize: false }` or pass DOMPurify options via `customConfig`.
+- `SvgView.setSvg()` always sanitizes SVG input using DOMPurify (no opt-out).
+- Text APIs (`setText`, input values) use textContent/values and are safe by default.
+
 
 ### DialogStack
 

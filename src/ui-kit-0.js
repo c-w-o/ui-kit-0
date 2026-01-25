@@ -91,6 +91,21 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  *   Chart.js UMD build (locally vendored)
  *
  *
+ * e) DOMPurify (HTML & SVG sanitization)
+ * ----------------------------------------
+ * Required for:
+ * - svg-view.js (XSS prevention for inline SVG)
+ * - sanitize.js (HTML sanitization utilities)
+ * - Recommended for any untrusted HTML rendering
+ *
+ * Expected global:
+ * - window.DOMPurify
+ *
+ * Recommended source (offline-capable):
+ *   https://github.com/cure53/DOMPurify
+ *   https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.x/purify.min.js
+ *
+ *
  * ------------------------------------------------------------
  * SCRIPT LOAD ORDER (Browser)
  * ------------------------------------------------------------
@@ -101,6 +116,7 @@ export const UI_KIT_VERSION = `${UI_KIT_MAJOR}.${UI_KIT_MINOR}.${UI_KIT_PATCH}`;
  * <script src="worker-json.js"></script>
  * <script src="jsoneditor.js"></script>
  * <script src="chart.umd.min.js"></script>
+ * <script src="dompurify/purify.min.js"></script>
  * <script type="module" src="ui-kit-0.js"></script>
  *
  *

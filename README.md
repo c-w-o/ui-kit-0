@@ -19,6 +19,13 @@ The project favors **clarity, predictability, and explicit structure** over abst
 
 ## Quick Start
 
+### Sanitization defaults
+
+- HTML: `dom.setHtml()` sanitizes by default using DOMPurify. You can disable it per call with `{ sanitize: false }` or pass custom DOMPurify config via `{ customConfig }`.
+- SVG: `SvgView.setSvg()` always sanitizes SVG input via DOMPurify to prevent XSS.
+- Text APIs (e.g., `setText`, input values) use textContent/values and are safe by default.
+
+
 ### Installation
 
 No build step or npm required. Simply load the framework in your HTML:
@@ -35,6 +42,7 @@ No build step or npm required. Simply load the framework in your HTML:
 <script src="./src/third_party/ace/worker-json.js"></script>
 <script src="./src/third_party/json-editor/jsoneditor.min.js"></script>
 <script src="./src/third_party/chartjs/chart.umd.min.js"></script>
+<script src="./src/third_party/dompurify/purify.min.js"></script> <!-- HTML/SVG sanitization -->
 
 <!-- Required: Module -->
 <script type="module" src="./src/ui-kit-0.js"></script>

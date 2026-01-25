@@ -1,15 +1,16 @@
 import { BaseElement } from "./base.js";
 import { ui } from "./ui.js";
+import { sanitizeSvg } from "./sanitize.js";
 
 /**
  * SvgView
  * - Specialized for inline SVG rendering only
  * - No <img> fallback; cleaner DOM structure
  *
- * Security note:
- * Inline SVG is basically HTML. If you inject untrusted SVG, you risk XSS.
- * This class removes <script> nodes, but that is NOT a full sanitizer.
- * Treat inline SVG as "trusted input only".
+ * Security:
+ * Inline SVG is basically HTML. This class uses DOMPurify to sanitize
+ * SVG strings before rendering. If DOMPurify is not available, a warning
+ * is logged and minimal hardening (script tag removal) is applied.
  */
 export class SvgView extends BaseElement {
   constructor({
@@ -54,12 +55,15 @@ export class SvgView extends BaseElement {
 
   /**
    * Set inline SVG from a string containing <svg ...>...</svg>
-   * Trusted input only.
+   * Input is automatically sanitized to prevent XSS.
    */
   setSvg(svgText) {
     if (!svgText) return this;
 
-    const svgEl = this._parseSvg(svgText);
+    // Sanitize SVG before parsing
+    const sanitized = sanitizeSvg(svgText);
+    
+    const svgEl = this._parseSvg(sanitized);
     
     // Clear old SVG if present
     if (this._svgEl) this._svgEl.remove();
@@ -88,9 +92,6 @@ export class SvgView extends BaseElement {
     if (!svg || svg.nodeName.toLowerCase() !== "svg") {
       throw new Error("SvgView: invalid SVG (no <svg> root)");
     }
-
-    // remove scripts (basic hardening; not a complete sanitizer!)
-    doc.querySelectorAll("script").forEach((n) => n.remove());
 
     // Make it behave like an image inside its box
     svg.removeAttribute("width");

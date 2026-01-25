@@ -1,4 +1,5 @@
 import { BaseElement } from "./base.js";
+import { sanitizeHtml } from "./sanitize.js";
 
 /**
  * DialogStack + ModalDialog
@@ -89,7 +90,8 @@ export class ModalDialog extends BaseElement {
     this.panel.el.innerHTML = "";
 
     if (typeof nodeOrElement === "string") {
-      this.panel.el.textContent = nodeOrElement;
+      // Sanitize HTML strings to prevent XSS
+      this.panel.el.innerHTML = sanitizeHtml(nodeOrElement);
       return this;
     }
 

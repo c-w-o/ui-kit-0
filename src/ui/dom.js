@@ -56,11 +56,44 @@ export const dom = {
     return el ? el.textContent : null;
   },
 
-  // IMPORTANT: only use with trusted HTML
-  setHtml(target, html) {
+  /**
+   * Set HTML content (sanitized by default for XSS protection).
+   * 
+   * WARNING: This method sanitizes HTML using DOMPurify if available.
+   * If you need to render untrusted HTML with custom rules, use:
+   *   import { sanitizeHtml } from "./sanitize.js"
+   *   const safe = sanitizeHtml(html, { ALLOWED_TAGS: [...] })
+   *   el.innerHTML = safe
+   * 
+   * @param {Element|string} target - Target element or selector
+   * @param {string} html - HTML string to set
+   * @param {object} options - { sanitize: boolean, customConfig: object }
+   * @returns {Element|null} The target element
+   */
+  setHtml(target, html, { sanitize = true, customConfig = {} } = {}) {
     const el = dom.get(target);
     if (!el) return null;
-    el.innerHTML = html ?? "";
+    
+    let content = html ?? "";
+    
+    if (sanitize) {
+      try {
+        // Dynamically import sanitizeHtml to avoid circular dependencies
+        const sanitizeModule = import("./sanitize.js");
+        sanitizeModule.then(({ sanitizeHtml }) => {
+          el.innerHTML = sanitizeHtml(content, customConfig);
+        }).catch(() => {
+          // Fallback: at least use textContent
+          el.textContent = content;
+        });
+      } catch {
+        // Fallback: use textContent (safe but no HTML)
+        el.textContent = content;
+      }
+    } else {
+      el.innerHTML = content;
+    }
+    
     return el;
   },
 
