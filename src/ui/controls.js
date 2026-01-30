@@ -386,7 +386,16 @@ export class RadioGroup extends BaseElement {
   
   setValue(value) {
     console.log("[RadioGroup.setValue]", "Setting value to:", value, "Available options:", this._options.map(o => o.value));
-    const option = this._options.find(opt => opt.value === value);
+    // Normalize helper: trim and collapse whitespace
+    const normalize = (v) => String(v ?? '').trim().replace(/\s+/g, ' ');
+    // Strip dots and lowercase for a tolerant fallback match
+    const stripDots = (v) => normalize(v).replace(/\./g, '').toLowerCase();
+
+    let option = this._options.find(opt => normalize(opt.value) === normalize(value));
+    if (!option) {
+      // Fallback: ignore dots and case differences (e.g. "S.O.G. Prairie Fire" vs "S.O.G Prairie Fire")
+      option = this._options.find(opt => stripDots(opt.value) === stripDots(value));
+    }
     console.log("[RadioGroup.setValue]", "Found option:", option);
     if (option) {
       // Uncheck all radios first
